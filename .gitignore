@@ -1,6 +1,4 @@
 .venv/
 dist/
 __pycache__/
-launcher/tv-token.txt
-launcher/*.log*
 config.local.json

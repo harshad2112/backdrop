@@ -136,6 +136,8 @@ def main():
     args = p.parse_args()
 
     config = load_config()
+    if config.get("image_url"):
+        config["image_url"] = normalise_url(config["image_url"])
     if args.set_url:
         url = normalise_url(args.set_url)
         check_url(url)

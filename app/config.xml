@@ -26,7 +26,7 @@
     <tizen:privilege name="http://tizen.org/privilege/application.launch"/>
 
     <!-- Asks to open the slideshow at boot. Consumer TVs only honour on-boot services for
-         partner-certified apps, so the PC launcher (launcher/) is what does this in practice. -->
+         partner-certified apps, so on most TVs this has no effect for a Developer Mode install. -->
     <tizen:service id="cl9IMZpNhA.BackdropService" auto-restart="false" on-boot="true">
         <tizen:content src="service.js"/>
         <tizen:name>BackdropService</tizen:name>

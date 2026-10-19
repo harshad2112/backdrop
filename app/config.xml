@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets"
+        id="http://backdrop.local/app" version="2.0.0" viewmodes="maximized">
+
+    <name>Backdrop</name>
+    <icon src="icon.png"/>
+    <content src="index.html"/>
+
+    <tizen:application id="cl9IMZpNhA.Backdrop" package="cl9IMZpNhA" required_version="2.4" launch_mode="single"/>
+    <tizen:profile name="tv-samsung"/>
+    <feature name="http://tizen.org/feature/screen.size.all"/>
+
+    <!-- Samsung TV behaviour -->
+    <tizen:metadata key="http://samsung.com/tv/metadata/screen/orientation" value="landscape"/>
+    <tizen:metadata key="http://samsung.com/tv/metadata/waitingscreen.type" value="notitle"/>
+    <tizen:metadata key="http://samsung.com/tv/metadata/multitasking.support" value="true"/>
+    <tizen:metadata key="http://tizen.org/metadata/app_ui_type/base_screen_resolution" value="extensive"/>
+
+    <!-- download + extract the image ZIP, keep the local copy, remote keys, launch from the service -->
+    <tizen:privilege name="http://tizen.org/privilege/internet"/>
+    <tizen:privilege name="http://tizen.org/privilege/download"/>
+    <tizen:privilege name="http://tizen.org/privilege/filesystem.read"/>
+    <tizen:privilege name="http://tizen.org/privilege/filesystem.write"/>
+    <tizen:privilege name="http://tizen.org/privilege/mediastorage"/>
+    <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
+    <tizen:privilege name="http://tizen.org/privilege/application.launch"/>
+
+    <!-- Asks to open the slideshow at boot. Consumer TVs only honour on-boot services for
+         partner-certified apps, so the PC launcher (launcher/) is what does this in practice. -->
+    <tizen:service id="cl9IMZpNhA.BackdropService" auto-restart="false" on-boot="true">
+        <tizen:content src="service.js"/>
+        <tizen:name>BackdropService</tizen:name>
+        <tizen:category name="http://tizen.org/category/service"/>
+    </tizen:service>
+
+    <tizen:setting screen-orientation="landscape" context-menu="disable" background-support="enable"
+                   encryption="disable" install-location="auto" hwkey-event="enable"/>
+</widget>

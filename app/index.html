@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no"/>
+	<title>Backdrop</title>
+	<style>
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		html, body {
+			width: 100%;
+			height: 100%;
+			background-color: #000;
+			overflow: hidden;
+			font-family: Arial, sans-serif;
+			color: #fafafa;
+		}
+
+		/* slideshow: two stacked layers so one can transition over the other */
+		.layer {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+			background: #000;
+			opacity: 0;
+		}
+
+		.layer.shown {
+			opacity: 1;
+		}
+
+		#message {
+			position: absolute;
+			top: 45%;
+			width: 100%;
+			text-align: center;
+			font-size: 28px;
+			color: #888;
+			display: none;
+		}
+
+		/* settings overlay */
+		#overlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, .45);
+			display: none;
+			align-items: center;
+			justify-content: center;
+			z-index: 10;
+		}
+
+		#overlay.open {
+			display: flex;
+		}
+
+		.panel {
+			width: 78%;
+			max-height: 88%;
+			display: flex;
+			flex-direction: column;
+			padding: 36px 44px;
+			border-radius: 18px;
+			background: rgba(24, 24, 28, .72);
+			border: 1px solid rgba(255, 255, 255, .12);
+			box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+		}
+
+		.panel h1 {
+			font-size: 40px;
+			font-weight: bold;
+			margin-bottom: 6px;
+		}
+
+		.status {
+			font-size: 22px;
+			color: #aaa;
+			margin-bottom: 26px;
+		}
+
+		.status .warn {
+			color: #ffb74d;
+		}
+
+		.section-label {
+			font-size: 24px;
+			color: #ccc;
+			margin: 18px 0 10px;
+		}
+
+		.options {
+			display: flex;
+			flex-wrap: wrap;
+		}
+
+		.btn {
+			font-size: 24px;
+			padding: 12px 26px;
+			margin: 0 14px 10px 0;
+			border-radius: 10px;
+			background: rgba(255, 255, 255, .1);
+			border: 3px solid transparent;
+			color: #eee;
+		}
+
+		.btn.selected {
+			background: #fafafa;
+			color: #111;
+		}
+
+		.focused {
+			border-color: #4fc3f7 !important;
+			box-shadow: 0 0 0 3px rgba(79, 195, 247, .35);
+		}
+
+		#grid {
+			display: flex;
+			flex-wrap: wrap;
+			overflow-y: auto;
+			max-height: 40vh;
+			padding: 6px 4px;
+		}
+
+		.thumb {
+			position: relative;
+			width: calc((100% - 6 * 14px) / 6);
+			margin: 0 14px 14px 0;
+			border-radius: 10px;
+			border: 4px solid transparent;
+			overflow: hidden;
+			background: #111;
+		}
+
+		.thumb img {
+			display: block;
+			width: 100%;
+			height: 120px;
+			object-fit: cover;
+		}
+
+		.thumb .name {
+			font-size: 16px;
+			padding: 4px 8px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			color: #ccc;
+		}
+
+		.thumb .check {
+			position: absolute;
+			top: 8px;
+			right: 8px;
+			width: 34px;
+			height: 34px;
+			line-height: 34px;
+			text-align: center;
+			font-size: 24px;
+			border-radius: 50%;
+			background: #4fc3f7;
+			color: #000;
+		}
+
+		.thumb.excluded img {
+			opacity: .3;
+		}
+
+		.thumb.excluded .check {
+			background: rgba(255, 255, 255, .2);
+			color: transparent;
+		}
+
+		.actions {
+			margin-top: 20px;
+		}
+
+		.hint {
+			font-size: 18px;
+			color: #888;
+			margin-top: 8px;
+		}
+	</style>
+	<script type="text/javascript">
+		// image ZIP URL; filled in from config.local.json by tools/build.py (empty = ask on first start)
+		var DEFAULT_URL = '';
+
+		// all files live in the TV's Downloads storage under these names
+		var DIRS = ['backdrop-a', 'backdrop-b']; // extract into the inactive one, switch only on success
+		var TMP_DIR = 'backdrop-tmp';
+		var REFRESH_MS = 6 * 60 * 60 * 1000;
+		var IMAGE_RE = /\.(jpg|jpeg|png|gif|webp)$/i;
+
+		var DURATIONS = [
+			{ label: '5s', value: '5' },
+			{ label: '10s', value: '10' },
+			{ label: '15s', value: '15' },
+			{ label: '30s', value: '30' },
+			{ label: '1 min', value: '60' },
+			{ label: '5 min', value: '300' },
+			{ label: 'Manual', value: '0' }
+		];
+		var TRANSITIONS = [
+			{ label: 'Fade', value: 'fade' },
+			{ label: 'Slide', value: 'slide' },
+			{ label: 'None', value: 'none' }
+		];
+		var GRID_COLS = 6;
+		var TRANSITION_MS = 1000;
+
+		var images = [];      // [{name, uri}] in the active dir, sorted by name
+		var playlist = [];    // images minus the excluded ones
+		var slideIndex = -1;
+		var slideTimer = null;
+		var frontLayer = 0;
+		var refreshing = false;
+		var lastRefreshError = null;
+		var usingOfflineCopy = false;
+
+		var settingsOpen = false;
+		var focusRows = [];   // [[element, ...], ...] for remote D-pad navigation
+		var focusRow = 0;
+		var focusCol = 0;
+
+		var KEY = { LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40, ENTER: 13, RETURN: 10009, INFO: 457, PLAYPAUSE: 10252, PLAY: 415, PAUSE: 19 };
+
+		// ---------- storage ----------
+
+		function setting(key, fallback) {
+			var v = localStorage.getItem(key);
+			return v === null ? fallback : v;
+		}
+
+		function setDef() {
+			if (localStorage.getItem('timer') === null) localStorage.setItem('timer', '10');
+			if (localStorage.getItem('transition') === null) localStorage.setItem('transition', 'fade');
+			if (localStorage.getItem('playout_url') === null && DEFAULT_URL) {
+				localStorage.setItem('playout_url', DEFAULT_URL);
+			}
+		}
+
+		function getExcluded() {
+			try {
+				return JSON.parse(localStorage.getItem('excluded')) || [];
+			} catch (e) {
+				return [];
+			}
+		}
+
+		function setExcluded(list) {
+			localStorage.setItem('excluded', JSON.stringify(list));
+		}
+
+		// ---------- filesystem ----------
+
+		function resolveDownloads(ok, fail) {
+			tizen.filesystem.resolve('downloads', ok, fail, 'rw');
+		}
+
+		function removeDir(name, callback) {
+			resolveDownloads(function(dir) {
+				try {
+					dir.deleteDirectory(dir.fullPath + '/' + name, true, function() {
+						callback();
+					}, function() {
+						callback();
+					});
+				} catch (e) {
+					callback(); // didn't exist
+				}
+			}, function() {
+				callback();
+			});
+		}
+
+		function makeDir(name, callback) {
+			resolveDownloads(function(dir) {
+				try {
+					dir.createDirectory(name);
+				} catch (e) {
+					// already exists
+				}
+				callback(null);
+			}, callback);
+		}
+
+		function listImages(dirName, callback) {
+			tizen.filesystem.resolve('downloads/' + dirName, function(dir) {
+				dir.listFiles(function(files) {
+					var list = files
+						.filter(function(f) { return f.isFile && IMAGE_RE.test(f.name); })
+						.map(function(f) { return { name: f.name, uri: f.toURI() }; });
+					list.sort(function(a, b) {
+						return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+					});
+					callback(null, list);
+				}, callback);
+			}, callback, 'r');
+		}
+
+		function download(url, callback) {
+			removeDir(TMP_DIR, function() {
+				makeDir(TMP_DIR, function(err) {
+					if (err) return callback(err);
+					var request = new tizen.DownloadRequest(url, 'downloads/' + TMP_DIR);
+					tizen.download.start(request, {
+						oncompleted: function(id, path) {
+							callback(null, path);
+						},
+						onfailed: function(id, error) {
+							callback(new Error(error.name || 'download failed'));
+						}
+					});
+				});
+			});
+		}
+
+		function unpack(zipPath, dirName, callback) {
+			removeDir(dirName, function() {
+				makeDir(dirName, function(err) {
+					if (err) return callback(err);
+					tizen.archive.open(zipPath, 'rw', function(archive) {
+						archive.extractAll('downloads/' + dirName, function() {
+							archive.close();
+							callback(null);
+						}, callback);
+					}, callback);
+				});
+			});
+		}
+
+		// ---------- local copy + refresh ----------
+
+		function activeDir() {
+			return setting('activeDir', '');
+		}
+
+		function loadLocalCopy(callback) {
+			var dirName = activeDir();
+			if (!dirName) return callback(null, []);
+			listImages(dirName, function(err, list) {
+				callback(null, err ? [] : list);
+			});
+		}
+
+		function ask(callback) {
+			var url = localStorage.getItem('playout_url');
+			if (url) return callback(url);
+
+			setTimeout(function() {
+				var input = prompt('Enter URL of a ZIP file with images', '');
+				if (!input) {
+					// keep the slideshow if we have one; otherwise ask again
+					if (images.length) return callback(null);
+					return ask(callback);
+				}
+				input = input.replace(/&amp;/g, '&');
+				localStorage.setItem('playout_url', input);
+				callback(input);
+			}, 100);
+		}
+
+		// Download the ZIP and extract into the inactive dir; the current images
+		// stay untouched unless the new set is complete.
+		function refresh(callback) {
+			callback = callback || function() {};
+			if (refreshing) return callback(new Error('already refreshing'));
+			refreshing = true;
+
+			function finish(err) {
+				refreshing = false;
+				lastRefreshError = err ? String(err.message || err.name || err) : null;
+				if (settingsOpen) renderStatus();
+				callback(err || null);
+			}
+
+			ask(function(url) {
+				if (!url) return finish(new Error('no URL'));
+
+				download(url, function(err, zipPath) {
+					if (err) return finish(err);
+
+					var target = activeDir() === DIRS[0] ? DIRS[1] : DIRS[0];
+					unpack(zipPath, target, function(err) {
+						removeDir(TMP_DIR, function() {});
+						if (err) return finish(err);
+
+						listImages(target, function(err, list) {
+							if (err) return finish(err);
+							if (!list.length) return finish(new Error('ZIP has no images'));
+
+							var old = activeDir();
+							localStorage.setItem('activeDir', target);
+							localStorage.setItem('lastUpdated', String(Date.now()));
+							usingOfflineCopy = false;
+							setImages(list);
+							if (old) removeDir(old, function() {});
+							finish(null);
+						});
+					});
+				});
+			});
+		}
+
+		// ---------- slideshow ----------
+
+		function layers() {
+			return [document.getElementById('layer0'), document.getElementById('layer1')];
+		}
+
+		function setImages(list) {
+			var current = playlist[slideIndex] && playlist[slideIndex].name;
+			images = list;
+			rebuildPlaylist(current);
+			if (settingsOpen) renderSettings();
+		}
+
+		function rebuildPlaylist(keepName) {
+			var excluded = getExcluded();
+			playlist = images.filter(function(img) { return excluded.indexOf(img.name) === -1; });
+			if (!playlist.length) playlist = images.slice(); // never show an empty screen
+
+			if (!playlist.length) {
+				showMessage('No images yet');
+				return;
+			}
+			hideMessage();
+
+			var idx = -1;
+			for (var i = 0; i < playlist.length; i++) {
+				if (playlist[i].name === keepName) idx = i;
+			}
+			if (idx === -1) {
+				slideIndex = -1;
+				nextSlide();
+			} else {
+				slideIndex = idx;
+				// same image object may have a new URI after a refresh
+				showImage(playlist[idx].uri, 'none');
+				scheduleNext();
+			}
+		}
+
+		function showImage(uri, transition) {
+			var ls = layers();
+			var front = ls[frontLayer];
+			var back = ls[1 - frontLayer];
+
+			back.onload = function() {
+				back.onload = null;
+				animate(front, back, transition || setting('transition', 'fade'));
+				frontLayer = 1 - frontLayer;
+			};
+			back.onerror = function() {
+				back.onerror = null;
+				scheduleNext(); // skip broken image on next tick
+			};
+			back.src = uri;
+		}
+
+		function animate(outEl, inEl, kind) {
+			var ms = TRANSITION_MS + 'ms';
+
+			// reset without animating
+			inEl.style.transition = 'none';
+			outEl.style.transition = 'none';
+			inEl.style.zIndex = 2;
+			outEl.style.zIndex = 1;
+
+			if (kind === 'slide') {
+				inEl.style.transform = 'translateX(100%)';
+				inEl.classList.add('shown');
+			} else if (kind === 'fade') {
+				inEl.style.transform = 'none';
+				inEl.classList.remove('shown');
+			} else {
+				inEl.style.transform = 'none';
+				outEl.style.transform = 'none';
+				inEl.classList.add('shown');
+				outEl.classList.remove('shown');
+				return;
+			}
+
+			void inEl.offsetWidth; // apply the start state before animating
+
+			if (kind === 'slide') {
+				inEl.style.transition = 'transform ' + ms + ' ease-in-out';
+				outEl.style.transition = 'transform ' + ms + ' ease-in-out';
+				inEl.style.transform = 'translateX(0)';
+				outEl.style.transform = 'translateX(-100%)';
+			} else {
+				inEl.style.transition = 'opacity ' + ms + ' ease-in-out';
+				inEl.classList.add('shown');
+			}
+
+			setTimeout(function() {
+				outEl.style.transition = 'none';
+				outEl.classList.remove('shown');
+				outEl.style.transform = 'none';
+			}, TRANSITION_MS + 50);
+		}
+
+		function scheduleNext() {
+			clearTimeout(slideTimer);
+			slideTimer = null;
+			if (settingsOpen || playlist.length < 2) return;
+
+			var seconds = Number(setting('timer', '10'));
+			if (seconds > 0) {
+				slideTimer = setTimeout(nextSlide, seconds * 1000);
+			}
+		}
+
+		function nextSlide() {
+			if (!playlist.length) return;
+			slideIndex = (slideIndex + 1) % playlist.length;
+			showImage(playlist[slideIndex].uri);
+			scheduleNext();
+		}
+
+		function prevSlide() {
+			if (!playlist.length) return;
+			slideIndex = (slideIndex - 1 + playlist.length) % playlist.length;
+			showImage(playlist[slideIndex].uri);
+			scheduleNext();
+		}
+
+		function showMessage(text) {
+			var m = document.getElementById('message');
+			m.textContent = text;
+			m.style.display = 'block';
+		}
+
+		function hideMessage() {
+			document.getElementById('message').style.display = 'none';
+		}
+
+		// ---------- settings overlay ----------
+
+		function openSettings() {
+			settingsOpen = true;
+			clearTimeout(slideTimer);
+			renderSettings();
+			document.getElementById('overlay').classList.add('open');
+		}
+
+		function closeSettings() {
+			settingsOpen = false;
+			document.getElementById('overlay').classList.remove('open');
+			var current = playlist[slideIndex] && playlist[slideIndex].name;
+			rebuildPlaylist(current);
+		}
+
+		function el(tag, cls, text) {
+			var e = document.createElement(tag);
+			if (cls) e.className = cls;
+			if (text !== undefined) e.textContent = text;
+			return e;
+		}
+
+		function renderStatus() {
+			var status = document.getElementById('status');
+			if (!status) return;
+
+			var excluded = getExcluded();
+			var selected = images.filter(function(img) { return excluded.indexOf(img.name) === -1; }).length;
+			var updated = Number(setting('lastUpdated', '0'));
+			var parts = [
+				images.length + ' images',
+				selected + ' selected',
+				updated ? 'updated ' + new Date(updated).toLocaleString() : 'never updated'
+			];
+			status.innerHTML = '';
+			status.appendChild(document.createTextNode(parts.join('  ·  ')));
+
+			var warn = null;
+			if (refreshing) warn = 'Checking for new images…';
+			else if (lastRefreshError) warn = 'Offline copy in use (update failed: ' + lastRefreshError + ')';
+			else if (usingOfflineCopy) warn = 'Offline copy in use';
+			if (images.length && !selected) warn = 'No images selected: showing all';
+			if (warn) {
+				status.appendChild(document.createTextNode('  ·  '));
+				status.appendChild(el('span', 'warn', warn));
+			}
+		}
+
+		function optionRow(parent, options, current, action) {
+			var row = el('div', 'options');
+			var els = options.map(function(o) {
+				var b = el('div', 'btn' + (o.value === current ? ' selected' : ''), o.label);
+				b.setAttribute('data-action', action);
+				b.setAttribute('data-value', o.value);
+				row.appendChild(b);
+				return b;
+			});
+			parent.appendChild(row);
+			return els;
+		}
+
+		function renderSettings() {
+			var panel = document.getElementById('panel');
+			panel.innerHTML = '';
+			focusRows = [];
+
+			panel.appendChild(el('h1', '', 'Backdrop settings'));
+			var status = el('div', 'status');
+			status.id = 'status';
+			panel.appendChild(status);
+
+			panel.appendChild(el('div', 'section-label', 'Time per image'));
+			focusRows.push(optionRow(panel, DURATIONS, setting('timer', '10'), 'timer'));
+
+			panel.appendChild(el('div', 'section-label', 'Transition'));
+			focusRows.push(optionRow(panel, TRANSITIONS, setting('transition', 'fade'), 'transition'));
+
+			panel.appendChild(el('div', 'section-label', 'Images (OK to select / unselect)'));
+			var grid = el('div');
+			grid.id = 'grid';
+			var excluded = getExcluded();
+			var row = [];
+			images.forEach(function(img, i) {
+				var t = el('div', 'thumb' + (excluded.indexOf(img.name) === -1 ? '' : ' excluded'));
+				t.setAttribute('data-action', 'toggle');
+				t.setAttribute('data-value', img.name);
+				var im = el('img');
+				im.src = img.uri;
+				t.appendChild(im);
+				t.appendChild(el('div', 'check', '✓'));
+				t.appendChild(el('div', 'name', img.name));
+				grid.appendChild(t);
+				row.push(t);
+				if (row.length === GRID_COLS || i === images.length - 1) {
+					focusRows.push(row);
+					row = [];
+				}
+			});
+			if (!images.length) grid.appendChild(el('div', 'hint', 'No images downloaded yet.'));
+			panel.appendChild(grid);
+
+			var actions = el('div', 'options actions');
+			var actionEls = [
+				['Select all', 'all'],
+				['Select none', 'none'],
+				['Refresh now', 'refresh'],
+				['Change URL', 'url'],
+				['Close', 'close']
+			].map(function(a) {
+				var b = el('div', 'btn', a[0]);
+				b.setAttribute('data-action', a[1]);
+				actions.appendChild(b);
+				return b;
+			});
+			panel.appendChild(actions);
+			focusRows.push(actionEls);
+			panel.appendChild(el('div', 'hint', 'Play/Pause or Back to close'));
+
+			renderStatus();
+			focusRow = Math.min(focusRow, focusRows.length - 1);
+			focusCol = Math.min(focusCol, focusRows[focusRow].length - 1);
+			updateFocus();
+		}
+
+		function updateFocus() {
+			var prev = document.querySelectorAll('#panel .focused');
+			for (var i = 0; i < prev.length; i++) prev[i].classList.remove('focused');
+			var target = focusRows[focusRow] && focusRows[focusRow][focusCol];
+			if (target) {
+				target.classList.add('focused');
+				if (target.scrollIntoView) target.scrollIntoView({ block: 'nearest' });
+			}
+		}
+
+		function moveFocus(dRow, dCol) {
+			if (dRow) {
+				focusRow = Math.max(0, Math.min(focusRows.length - 1, focusRow + dRow));
+				focusCol = Math.min(focusCol, focusRows[focusRow].length - 1);
+			} else {
+				focusCol = Math.max(0, Math.min(focusRows[focusRow].length - 1, focusCol + dCol));
+			}
+			updateFocus();
+		}
+
+		function selectOption(target, key) {
+			localStorage.setItem(key, target.getAttribute('data-value'));
+			var siblings = target.parentNode.children;
+			for (var i = 0; i < siblings.length; i++) siblings[i].classList.remove('selected');
+			target.classList.add('selected');
+		}
+
+		function activate() {
+			var target = focusRows[focusRow] && focusRows[focusRow][focusCol];
+			if (!target) return;
+			var action = target.getAttribute('data-action');
+			var value = target.getAttribute('data-value');
+
+			if (action === 'timer' || action === 'transition') {
+				selectOption(target, action);
+			} else if (action === 'toggle') {
+				var excluded = getExcluded();
+				var i = excluded.indexOf(value);
+				if (i === -1) excluded.push(value); else excluded.splice(i, 1);
+				setExcluded(excluded);
+				target.classList.toggle('excluded', i === -1);
+				renderStatus();
+			} else if (action === 'all') {
+				setExcluded([]);
+				renderSettings();
+			} else if (action === 'none') {
+				setExcluded(images.map(function(img) { return img.name; }));
+				renderSettings();
+			} else if (action === 'refresh') {
+				refresh();
+				renderStatus();
+			} else if (action === 'url') {
+				var input = prompt('Enter URL of a ZIP file with images', setting('playout_url', ''));
+				if (input) {
+					localStorage.setItem('playout_url', input.replace(/&amp;/g, '&'));
+					refresh();
+					renderStatus();
+				}
+			} else if (action === 'close') {
+				closeSettings();
+			}
+		}
+
+		// ---------- keys ----------
+
+		function registerKeys() {
+			['MediaPlayPause', 'MediaPlay', 'MediaPause', 'Info'].forEach(function(name) {
+				try {
+					tizen.tvinputdevice.registerKey(name);
+					KEY[name] = tizen.tvinputdevice.getKey(name).code;
+				} catch (e) {
+					// key not on this remote
+				}
+			});
+		}
+
+		function isSettingsKey(code) {
+			return code === KEY.PLAYPAUSE || code === KEY.PLAY || code === KEY.PAUSE || code === KEY.INFO ||
+				code === KEY.MediaPlayPause || code === KEY.MediaPlay || code === KEY.MediaPause || code === KEY.Info;
+		}
+
+		document.addEventListener('keydown', function(event) {
+			var code = event.keyCode;
+
+			if (settingsOpen) {
+				if (isSettingsKey(code) || code === KEY.RETURN) closeSettings();
+				else if (code === KEY.UP) moveFocus(-1, 0);
+				else if (code === KEY.DOWN) moveFocus(1, 0);
+				else if (code === KEY.LEFT) moveFocus(0, -1);
+				else if (code === KEY.RIGHT) moveFocus(0, 1);
+				else if (code === KEY.ENTER) activate();
+				event.preventDefault();
+				return;
+			}
+
+			if (isSettingsKey(code)) openSettings();
+			else if (code === KEY.LEFT) prevSlide();
+			else if (code === KEY.RIGHT) nextSlide();
+			else if (code === KEY.RETURN) {
+				// hide instead of exit so the slideshow stays loaded in the background
+				tizen.application.getCurrentApplication().hide();
+			}
+		});
+
+		// ---------- start ----------
+
+		function onLoad() {
+			if (window.tizen === undefined) {
+				showMessage('TIZEN API is not supported on this device');
+				return;
+			}
+
+			registerKeys();
+			setDef();
+
+			// image folders left in Downloads by the earlier prototype of this app
+			['wallA', 'wallB'].forEach(function(name) {
+				removeDir(name, function() {});
+			});
+
+			// show the local copy right away, then check for new images
+			loadLocalCopy(function(err, list) {
+				if (list.length) {
+					usingOfflineCopy = true;
+					setImages(list);
+				}
+				refresh(function(err) {
+					if (err && !images.length) {
+						showMessage('Could not download images. Retrying in 1 minute…');
+						setTimeout(function() { refresh(); }, 60 * 1000);
+					}
+				});
+			});
+
+			setInterval(function() { refresh(); }, REFRESH_MS);
+		}
+	</script>
+</head>
+<body onload="onLoad();">
+	<img id="layer0" class="layer" alt=""/>
+	<img id="layer1" class="layer" alt=""/>
+	<div id="message"></div>
+	<div id="overlay"><div class="panel" id="panel"></div></div>
+</body>
+</html>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets"
-        id="http://backdrop.local/app" version="2.0.0" viewmodes="maximized">
+        id="http://backdrop.local/app" version="2.11.0" viewmodes="maximized">
 
     <name>Backdrop</name>
     <icon src="icon.png"/>
@@ -15,6 +15,9 @@
     <tizen:metadata key="http://samsung.com/tv/metadata/waitingscreen.type" value="notitle"/>
     <tizen:metadata key="http://samsung.com/tv/metadata/multitasking.support" value="true"/>
     <tizen:metadata key="http://tizen.org/metadata/app_ui_type/base_screen_resolution" value="extensive"/>
+
+    <!-- image sources: the user's ZIP link and the Picsum / Unsplash / Wallhaven APIs -->
+    <access origin="*" subdomains="true"/>
 
     <!-- download + extract the image ZIP, keep the local copy, remote keys, launch from the service -->
     <tizen:privilege name="http://tizen.org/privilege/internet"/>

@@ -38,6 +38,8 @@ SDB_PORT = 26101
 APP_FILES = ("config.xml", "index.html", "service.js", "icon.png")
 IMAGE_RE = re.compile(r"\.(jpg|jpeg|png|gif|webp)$", re.I)
 URL_RE = re.compile(r"var DEFAULT_URL = '(.*?)';")
+# config.local.json key -> JavaScript variable in app/index.html, filled in at build time
+INJECT = {"image_url": "DEFAULT_URL", "unsplash_key": "UNSPLASH_KEY"}
 
 
 def run(cmd):
@@ -88,25 +90,39 @@ def check_url(url):
         print(f"WARNING: {len(nested)} images are inside folders and won't be shown, e.g. {nested[0]}")
 
 
-def build(image_url):
+def inject_values(src, config):
+    """Fill the INJECT variables in the app's source with values from config (empty ones are skipped)."""
+    for key, var in INJECT.items():
+        value = config.get(key, "")
+        if not value:
+            continue
+        escaped = value.replace("\\", "\\\\").replace("'", "\\'")
+        src, n = re.subn(rf"var {var} = '.*?';", lambda m: f"var {var} = '{escaped}';", src, count=1)
+        if n != 1:
+            raise ValueError(f"{var} not found in app/index.html")
+    return src
+
+
+def build(config):
     version, name = app_version()
     shutil.rmtree(STAGE_DIR, ignore_errors=True)
     os.makedirs(STAGE_DIR)
     for f in APP_FILES:
         shutil.copy2(os.path.join(APP_DIR, f), STAGE_DIR)
 
-    if image_url:
-        index = os.path.join(STAGE_DIR, "index.html")
-        with open(index, encoding="utf-8") as f:
-            src = f.read()
-        escaped = image_url.replace("\\", "\\\\").replace("'", "\\'")
-        src, n = URL_RE.subn(lambda m: f"var DEFAULT_URL = '{escaped}';", src, count=1)
-        if n != 1:
-            sys.exit("DEFAULT_URL not found in app/index.html")
-        with open(index, "w", encoding="utf-8", newline="") as f:
-            f.write(src)
-    else:
-        print("no image_url configured: the app will ask for one on first start")
+    # personal values go into the packaged copy only; app/index.html stays clean
+    index = os.path.join(STAGE_DIR, "index.html")
+    with open(index, encoding="utf-8") as f:
+        src = f.read()
+    for key in INJECT:
+        if not config.get(key):
+            print(f"note: no {key} in config.local.json")
+    try:
+        src = inject_values(src, config)
+    except ValueError as e:
+        sys.exit(str(e))
+    with open(index, "w", encoding="utf-8", newline="") as f:
+        f.write(src)
 
     code, out = run([TIZEN, "package", "-t", "wgt", "-s", SIGNING_PROFILE, "--", STAGE_DIR])
     wgt = os.path.join(STAGE_DIR, f"{name}.wgt")
@@ -149,7 +165,7 @@ def main():
             sys.exit("no image_url in config.local.json")
         check_url(config["image_url"])
 
-    name = build(config.get("image_url", ""))
+    name = build(config)
     if args.install:
         if not config.get("tv_ip"):
             sys.exit("set tv_ip in config.local.json to install")

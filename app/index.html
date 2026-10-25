@@ -36,6 +36,203 @@
 			opacity: 1;
 		}
 
+		/* software brightness: black layer over the slideshow (TV backlight isn't available to apps) */
+		#dim {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: #000;
+			opacity: 0;
+			pointer-events: none;
+			z-index: 5;
+			transition: opacity 300ms ease-out;
+		}
+
+		/* clock: centred over the image, below the dim layer so it dims with the picture */
+		#clock {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			display: none;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			z-index: 3;
+			pointer-events: none;
+			color: #fff;
+			font-family: 'SamsungOneUI', 'SamsungOne', 'Helvetica Neue', Arial, sans-serif;
+			text-shadow: 0 2px 28px rgba(0, 0, 0, .45), 0 1px 3px rgba(0, 0, 0, .35);
+		}
+
+		#clock.on {
+			display: flex;
+		}
+
+		#clock .time-row {
+			display: flex;
+			align-items: baseline;
+		}
+
+		#clock .time {
+			font-size: 200px;
+			font-weight: 200;
+			line-height: 1;
+			letter-spacing: -4px;
+		}
+
+		#clock .ampm {
+			font-size: 46px;
+			font-weight: 300;
+			letter-spacing: 2px;
+			margin-left: 14px;
+		}
+
+		#clock .date {
+			margin-top: 20px;
+			font-size: 32px;
+			font-weight: 300;
+			letter-spacing: 6px;
+			text-transform: uppercase;
+			opacity: .9;
+		}
+
+		#clock .date:empty {
+			display: none; /* keep the time centred when the date is off */
+		}
+
+		/* photo credit, e.g. "Photo by … on Unsplash" (required for Unsplash photos) */
+		#credit {
+			position: absolute;
+			left: 36px;
+			bottom: 28px;
+			z-index: 3;
+			pointer-events: none;
+			font-size: 18px;
+			color: rgba(255, 255, 255, .8);
+			text-shadow: 0 1px 6px rgba(0, 0, 0, .7);
+		}
+
+		/* short message, e.g. "♥ Saved to favorites" */
+		#toast {
+			position: absolute;
+			left: 50%;
+			bottom: 12%;
+			z-index: 20; /* above the settings overlay (10) */
+			padding: 14px 30px;
+			border-radius: 30px;
+			background: rgba(20, 20, 24, .78);
+			color: #fff;
+			font-size: 26px;
+			pointer-events: none;
+			opacity: 0;
+			transform: translate(-50%, 10px);
+			transition: opacity 200ms, transform 200ms;
+		}
+
+		#toast.show {
+			opacity: 1;
+			transform: translate(-50%, 0);
+		}
+
+		/* multi-select chips (Unsplash themes) */
+		.btn.chip.selected::before {
+			content: '✓ ';
+		}
+
+		#clock.size-s .time { font-size: 120px; letter-spacing: -2px; }
+		#clock.size-s .ampm { font-size: 30px; margin-left: 10px; }
+		#clock.size-s .date { font-size: 22px; letter-spacing: 4px; margin-top: 12px; }
+
+		#clock.size-l .time { font-size: 300px; letter-spacing: -6px; }
+		#clock.size-l .ampm { font-size: 64px; margin-left: 18px; }
+		#clock.size-l .date { font-size: 44px; letter-spacing: 8px; margin-top: 26px; }
+
+		#clock.pos-bottom {
+			justify-content: flex-end;
+			padding-bottom: 7%;
+		}
+
+		#clock.pos-corner {
+			justify-content: flex-end;
+			align-items: flex-end;
+			padding: 0 5% 5% 0;
+		}
+
+		/* settings: main menu entries */
+		.menu-item {
+			display: flex;
+			align-items: center;
+			padding: 20px 26px;
+			margin-bottom: 12px;
+			border-radius: 12px;
+			background: rgba(255, 255, 255, .08);
+			border: 3px solid transparent;
+		}
+
+		.menu-item .label {
+			font-size: 28px;
+		}
+
+		.menu-item .summary {
+			margin-left: auto;
+			font-size: 22px;
+			color: #aaa;
+		}
+
+		.menu-item .chevron {
+			margin-left: 20px;
+			font-size: 34px;
+			color: #888;
+		}
+
+		/* settings: on/off switches */
+		.switch-row {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			width: 75%;
+			padding: 16px 22px;
+			margin-bottom: 12px;
+			border-radius: 10px;
+			background: rgba(255, 255, 255, .1);
+			border: 3px solid transparent;
+			font-size: 26px;
+		}
+
+		.switch-row .switch {
+			position: relative;
+			width: 64px;
+			height: 34px;
+			border-radius: 17px;
+			background: rgba(255, 255, 255, .25);
+			transition: background 150ms;
+		}
+
+		.switch-row .switch::after {
+			content: '';
+			position: absolute;
+			top: 4px;
+			left: 4px;
+			width: 26px;
+			height: 26px;
+			border-radius: 50%;
+			background: #fafafa;
+			transition: left 150ms;
+		}
+
+		.switch-row.on .switch {
+			background: #4fc3f7;
+		}
+
+		.switch-row.on .switch::after {
+			left: 34px;
+		}
+
+
 		#message {
 			position: absolute;
 			top: 45%;
@@ -54,26 +251,162 @@
 			width: 100%;
 			height: 100%;
 			background: rgba(0, 0, 0, .45);
-			display: none;
+			display: flex;
 			align-items: center;
 			justify-content: center;
 			z-index: 10;
+			/* fade out, then hide (visibility waits for the fade) */
+			opacity: 0;
+			visibility: hidden;
+			transition: opacity 220ms ease, visibility 0s linear 220ms;
 		}
 
 		#overlay.open {
-			display: flex;
+			opacity: 1;
+			visibility: visible;
+			transition: opacity 220ms ease;
 		}
 
+		#overlay .panel {
+			transform: translateY(16px) scale(.96);
+			transition: transform 260ms cubic-bezier(.2, .8, .2, 1);
+		}
+
+		#overlay.open .panel {
+			transform: none;
+		}
+
+		/* switching pages: content slides in from the side you're heading to */
+		@keyframes page-in-forward {
+			from { opacity: 0; transform: translateX(48px); }
+			to { opacity: 1; transform: none; }
+		}
+
+		@keyframes page-in-back {
+			from { opacity: 0; transform: translateX(-48px); }
+			to { opacity: 1; transform: none; }
+		}
+
+		.anim-forward {
+			animation: page-in-forward 240ms cubic-bezier(.2, .8, .2, 1);
+		}
+
+		.anim-back {
+			animation: page-in-back 240ms cubic-bezier(.2, .8, .2, 1);
+		}
+
+		/* focus and state changes ease instead of snapping */
+		.btn, .menu-item, .switch-row, .slider, .thumb {
+			transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease,
+				box-shadow 160ms ease, transform 160ms ease;
+		}
+
+		.menu-item.focused, .switch-row.focused, .slider.focused {
+			transform: scale(1.015);
+		}
+
+		.btn.focused, .thumb.focused {
+			transform: scale(1.05);
+		}
+
+		/* same size on every page: title + status fixed at the top, hint at the bottom, the rest scrolls */
 		.panel {
-			width: 78%;
-			max-height: 88%;
+			width: 62%;
+			height: 70%;
 			display: flex;
 			flex-direction: column;
-			padding: 36px 44px;
+			overflow: hidden;
+			padding: 36px 30px 24px 32px;
 			border-radius: 18px;
 			background: rgba(24, 24, 28, .72);
 			border: 1px solid rgba(255, 255, 255, .12);
 			box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+		}
+
+		.panel > * {
+			flex-shrink: 0;
+		}
+
+		.panel > .panel-body {
+			flex: 1 1 auto;
+			min-height: 0;
+			overflow-y: auto;
+			/* room on every side for the focused item's enlarged border and glow, which the
+			   scroll area would otherwise clip */
+			padding: 10px 18px 10px 14px;
+		}
+
+		/* Images page: one tab per source */
+		.tabs {
+			display: flex;
+			margin: 0 0 12px 12px;
+			border-bottom: 1px solid rgba(255, 255, 255, .12);
+		}
+
+		.tab {
+			position: relative;
+			margin-right: 8px;
+			padding: 10px 22px 12px;
+			border: 3px solid transparent;
+			border-radius: 10px 10px 0 0;
+			font-size: 24px;
+			color: #aaa;
+			transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease,
+				box-shadow 160ms ease, transform 160ms ease;
+		}
+
+		.tab.active {
+			color: #fff;
+			background: rgba(255, 255, 255, .1);
+		}
+
+		.tab.active::after {
+			content: '';
+			position: absolute;
+			left: 14px;
+			right: 14px;
+			bottom: -3px;
+			height: 3px;
+			border-radius: 2px;
+			background: #4fc3f7;
+		}
+
+		.tab.focused {
+			transform: scale(1.05);
+		}
+
+		.tab .dot {
+			margin-left: 8px;
+			font-size: 14px;
+			color: #66bb6a;
+		}
+
+		.source-status {
+			font-size: 22px;
+			color: #ccc;
+			margin: 6px 0;
+		}
+
+		.source-status .off {
+			color: #777;
+		}
+
+		.source-status .err {
+			color: #ffb74d;
+		}
+
+		.panel-body::-webkit-scrollbar {
+			width: 10px;
+		}
+
+		.panel-body::-webkit-scrollbar-track {
+			background: rgba(255, 255, 255, .08);
+			border-radius: 5px;
+		}
+
+		.panel-body::-webkit-scrollbar-thumb {
+			background: rgba(255, 255, 255, .45);
+			border-radius: 5px;
 		}
 
 		.panel h1 {
@@ -95,7 +428,7 @@
 		.section-label {
 			font-size: 24px;
 			color: #ccc;
-			margin: 18px 0 10px;
+			margin: 14px 0 8px;
 		}
 
 		.options {
@@ -126,14 +459,55 @@
 		#grid {
 			display: flex;
 			flex-wrap: wrap;
-			overflow-y: auto;
-			max-height: 40vh;
 			padding: 6px 4px;
+		}
+
+		.slider {
+			display: flex;
+			align-items: center;
+			width: 75%;
+			padding: 14px 22px;
+			border-radius: 10px;
+			background: rgba(255, 255, 255, .1);
+			border: 3px solid transparent;
+		}
+
+		.slider .track {
+			position: relative;
+			flex: 1;
+			height: 10px;
+			border-radius: 5px;
+			background: rgba(255, 255, 255, .2);
+		}
+
+		.slider .fill {
+			height: 100%;
+			border-radius: 5px;
+			background: #4fc3f7;
+			transition: width 140ms ease-out;
+		}
+
+		.slider .knob {
+			position: absolute;
+			top: 50%;
+			width: 28px;
+			height: 28px;
+			border-radius: 50%;
+			background: #fafafa;
+			transform: translate(-50%, -50%);
+			box-shadow: 0 2px 6px rgba(0, 0, 0, .4);
+			transition: left 140ms ease-out;
+		}
+
+		.slider .value {
+			width: 90px;
+			text-align: right;
+			font-size: 24px;
 		}
 
 		.thumb {
 			position: relative;
-			width: calc((100% - 6 * 14px) / 6);
+			width: calc((100% - 5 * 14px) / 5);
 			margin: 0 14px 14px 0;
 			border-radius: 10px;
 			border: 4px solid transparent;
@@ -146,6 +520,7 @@
 			width: 100%;
 			height: 120px;
 			object-fit: cover;
+			transition: opacity 160ms ease;
 		}
 
 		.thumb .name {
@@ -180,6 +555,21 @@
 			color: transparent;
 		}
 
+		/* Favorites page: ✕ only on images marked for deletion */
+		.thumb.fav .check {
+			display: none;
+		}
+
+		.thumb.fav.marked .check {
+			display: block;
+			background: #e53935;
+			color: #fff;
+		}
+
+		.thumb.fav.marked img {
+			opacity: .4;
+		}
+
 		.actions {
 			margin-top: 20px;
 		}
@@ -191,14 +581,60 @@
 		}
 	</style>
 	<script type="text/javascript">
-		// image ZIP URL; filled in from config.local.json by tools/build.py (empty = ask on first start)
-		var DEFAULT_URL = '';
+		// filled in from config.local.json by tools/build.py
+		var DEFAULT_URL = '';   // image ZIP link ("Custom link" source)
+		var UNSPLASH_KEY = '';  // Unsplash access key ("Photos by theme" source)
 
 		// all files live in the TV's Downloads storage under these names
-		var DIRS = ['backdrop-a', 'backdrop-b']; // extract into the inactive one, switch only on success
+		var DIRS = ['backdrop-a', 'backdrop-b']; // ZIP: extract into the inactive one, switch only on success
 		var TMP_DIR = 'backdrop-tmp';
-		var REFRESH_MS = 6 * 60 * 60 * 1000;
+		var HOUR_MS = 60 * 60 * 1000;
+		var ZIP_REFRESH_MS = 6 * HOUR_MS;
+		var CHECK_EVERY_MS = 30 * 60 * 1000; // how often to see whether any source is due
+		var DOWNLOAD_TIMEOUT_MS = 90 * 1000;
+		var BATCH = 5;                         // new images per scheduled update once a source is full
 		var IMAGE_RE = /\.(jpg|jpeg|png|gif|webp)$/i;
+
+		var SOURCES = [
+			{ label: 'Favorites', value: 'favorites' }, // saved with OK; never deleted or refreshed
+			{ label: 'Custom link (ZIP)', value: 'zip' },
+			{ label: 'Random photos (Picsum)', value: 'picsum' },
+			{ label: 'Photos by theme (Unsplash)', value: 'unsplash' },
+			{ label: 'Wallpapers (Wallhaven)', value: 'wallhaven' }
+		].map(function(s) { s.id = s.value; return s; });
+		var UNSPLASH_THEMES = [
+			{ label: 'Nature', value: 'nature' },
+			{ label: 'Mountains', value: 'mountains' },
+			{ label: 'Ocean', value: 'ocean' },
+			{ label: 'Forest', value: 'forest' },
+			{ label: 'Sky', value: 'sky' },
+			{ label: 'City', value: 'city' },
+			{ label: 'Architecture', value: 'architecture' },
+			{ label: 'Space', value: 'space' },
+			{ label: 'Flowers', value: 'flowers' },
+			{ label: 'Minimal', value: 'minimal' },
+			{ label: 'Travel', value: 'travel' },
+			{ label: 'Animals', value: 'animals' }
+		];
+		var KEEP_OPTIONS = [
+			{ label: '10', value: '10' },
+			{ label: '20', value: '20' },
+			{ label: '30', value: '30' }
+		];
+		var FETCH_OPTIONS = [
+			{ label: 'Every 6 hours', value: '6' },
+			{ label: 'Daily', value: '24' },
+			{ label: 'Only manually', value: '0' }
+		];
+		var ORDERS = [
+			{ label: 'In order', value: 'name' },
+			{ label: 'Shuffle', value: 'shuffle' }
+		];
+		var WALLHAVEN_CATEGORIES = [ // order matches Wallhaven's categories bit string
+			{ label: 'General', value: 'general' },
+			{ label: 'Anime', value: 'anime' },
+			{ label: 'People', value: 'people' }
+		];
 
 		var DURATIONS = [
 			{ label: '5s', value: '5' },
@@ -214,17 +650,32 @@
 			{ label: 'Slide', value: 'slide' },
 			{ label: 'None', value: 'none' }
 		];
-		var GRID_COLS = 6;
+		var BRIGHTNESS_MIN = 10; // 0 would be a black screen
+		var BRIGHTNESS_STEP = 5;
+		var CLOCK_SIZES = [
+			{ label: 'Small', value: 's' },
+			{ label: 'Medium', value: 'm' },
+			{ label: 'Large', value: 'l' }
+		];
+		var CLOCK_POSITIONS = [
+			{ label: 'Center', value: 'center' },
+			{ label: 'Bottom', value: 'bottom' },
+			{ label: 'Corner', value: 'corner' }
+		];
+		var DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+		var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+			'August', 'September', 'October', 'November', 'December'];
+		var GRID_COLS = 5;
 		var TRANSITION_MS = 1000;
 
-		var images = [];      // [{name, uri}] in the active dir, sorted by name
+		var images = [];      // [{name: '<source>/<file>', label, uri, thumb, credit, source}] from enabled sources
 		var playlist = [];    // images minus the excluded ones
 		var slideIndex = -1;
 		var slideTimer = null;
 		var frontLayer = 0;
 		var refreshing = false;
-		var lastRefreshError = null;
-		var usingOfflineCopy = false;
+		var sourceErrors = {}; // source id -> last error message
+		var favoriteImages = []; // all saved favorites, whether or not they're in the slideshow
 
 		var settingsOpen = false;
 		var focusRows = [];   // [[element, ...], ...] for remote D-pad navigation
@@ -243,9 +694,85 @@
 		function setDef() {
 			if (localStorage.getItem('timer') === null) localStorage.setItem('timer', '10');
 			if (localStorage.getItem('transition') === null) localStorage.setItem('transition', 'fade');
+			if (localStorage.getItem('brightness') === null) localStorage.setItem('brightness', '100');
+			// v2.3 stored one 'clock' setting (off / time / date); split it into switches
+			var oldClock = localStorage.getItem('clock');
+			if (oldClock !== null) {
+				localStorage.setItem('clockShow', oldClock === 'off' ? '0' : '1');
+				localStorage.setItem('clockDate', oldClock === 'date' ? '1' : '0');
+				localStorage.removeItem('clock');
+			}
+			if (localStorage.getItem('clockShow') === null) localStorage.setItem('clockShow', '0');
+			if (localStorage.getItem('clockFormat') === null) localStorage.setItem('clockFormat', '12');
+			if (localStorage.getItem('clockDate') === null) localStorage.setItem('clockDate', '0');
+			if (localStorage.getItem('clockSeconds') === null) localStorage.setItem('clockSeconds', '0');
+			if (localStorage.getItem('clockSize') === null) localStorage.setItem('clockSize', 'm');
+			if (localStorage.getItem('clockPos') === null) localStorage.setItem('clockPos', 'center');
 			if (localStorage.getItem('playout_url') === null && DEFAULT_URL) {
 				localStorage.setItem('playout_url', DEFAULT_URL);
 			}
+
+			// sources: start with the ZIP link if there is one, otherwise random photos
+			var hasLink = !!setting('playout_url', '');
+			if (localStorage.getItem('src_zip') === null) localStorage.setItem('src_zip', hasLink ? '1' : '0');
+			if (localStorage.getItem('src_picsum') === null) localStorage.setItem('src_picsum', hasLink ? '0' : '1');
+			if (localStorage.getItem('src_unsplash') === null) localStorage.setItem('src_unsplash', '0');
+			if (localStorage.getItem('src_wallhaven') === null) localStorage.setItem('src_wallhaven', '0');
+			if (localStorage.getItem('src_favorites') === null) localStorage.setItem('src_favorites', '1');
+			if (localStorage.getItem('favOnly') === null) localStorage.setItem('favOnly', '0');
+			if (localStorage.getItem('unsplashThemes') === null) {
+				localStorage.setItem('unsplashThemes', JSON.stringify(['nature', 'mountains', 'ocean']));
+			}
+			if (localStorage.getItem('whCategories') === null) localStorage.setItem('whCategories', JSON.stringify(['general']));
+			if (localStorage.getItem('whThemes') === null) localStorage.setItem('whThemes', JSON.stringify([]));
+			if (localStorage.getItem('keep') === null) localStorage.setItem('keep', '20');
+			if (localStorage.getItem('fetchEvery') === null) localStorage.setItem('fetchEvery', '24');
+			if (localStorage.getItem('order') === null) localStorage.setItem('order', 'name');
+			if (localStorage.getItem('showCredits') === null) localStorage.setItem('showCredits', '1');
+
+			// v2.5 excluded plain file names from the ZIP; images are now '<source>/<file>'
+			var excluded = getExcluded();
+			if (excluded.some(function(n) { return n.indexOf('/') === -1; })) {
+				setExcluded(excluded.map(function(n) { return n.indexOf('/') === -1 ? 'zip/' + n : n; }));
+			}
+		}
+
+		function applyBrightness() {
+			var percent = Number(setting('brightness', '100'));
+			document.getElementById('dim').style.opacity = String(1 - percent / 100);
+		}
+
+		function updateClock() {
+			var clock = document.getElementById('clock');
+			var show = setting('clockShow', '0') === '1';
+			var cls = (show ? 'on ' : '') + 'size-' + setting('clockSize', 'm') + ' pos-' + setting('clockPos', 'center');
+			if (clock.className !== cls) clock.className = cls;
+			if (!show) return;
+
+			var now = new Date();
+			var h = now.getHours();
+			var m = ('0' + now.getMinutes()).slice(-2);
+			if (setting('clockSeconds', '0') === '1') m += ':' + ('0' + now.getSeconds()).slice(-2);
+			var ampm = '';
+			if (setting('clockFormat', '12') === '12') {
+				ampm = h < 12 ? 'AM' : 'PM';
+				h = h % 12 || 12;
+			} else {
+				h = ('0' + h).slice(-2);
+			}
+
+			var parts = {
+				time: h + ':' + m,
+				ampm: ampm,
+				date: setting('clockDate', '0') === '1'
+					? DAYS[now.getDay()] + ', ' + now.getDate() + ' ' + MONTHS[now.getMonth()]
+					: ''
+			};
+			// only touch the DOM when the text changes (this runs every second)
+			['time', 'ampm', 'date'].forEach(function(key) {
+				var node = clock.querySelector('.' + key);
+				if (node.textContent !== parts[key]) node.textContent = parts[key];
+			});
 		}
 
 		function getExcluded() {
@@ -293,18 +820,636 @@
 			}, callback);
 		}
 
+		function deleteFile(dirName, fileName) {
+			tizen.filesystem.resolve('downloads/' + dirName, function(dir) {
+				try {
+					dir.deleteFile(dir.fullPath + '/' + fileName, function() {}, function() {});
+				} catch (e) {
+					// already gone
+				}
+			}, function() {}, 'rw');
+		}
+
 		function listImages(dirName, callback) {
 			tizen.filesystem.resolve('downloads/' + dirName, function(dir) {
 				dir.listFiles(function(files) {
 					var list = files
 						.filter(function(f) { return f.isFile && IMAGE_RE.test(f.name); })
-						.map(function(f) { return { name: f.name, uri: f.toURI() }; });
+						.map(function(f) { return { file: f.name, uri: f.toURI() }; });
 					list.sort(function(a, b) {
-						return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+						return a.file.localeCompare(b.file, undefined, { numeric: true, sensitivity: 'base' });
 					});
 					callback(null, list);
 				}, callback);
 			}, callback, 'r');
+		}
+
+		function readText(path, callback) {
+			tizen.filesystem.resolve(path, function(file) {
+				file.readAsText(function(text) { callback(null, text); }, callback, 'UTF-8');
+			}, callback, 'r');
+		}
+
+		// Download url into downloads/<dirName>; callback(err, savedFileName).
+		function downloadTo(url, dirName, fileName, callback) {
+			makeDir(dirName, function(err) {
+				if (err) return callback(err);
+				var done = false;
+				var request = fileName
+					? new tizen.DownloadRequest(url, 'downloads/' + dirName, fileName)
+					: new tizen.DownloadRequest(url, 'downloads/' + dirName);
+				var id = tizen.download.start(request, {
+					oncompleted: function(downloadId, path) {
+						if (done) return;
+						done = true;
+						callback(null, path.split('/').pop());
+					},
+					onfailed: function(downloadId, error) {
+						if (done) return;
+						done = true;
+						callback(new Error(error.name || 'download failed'));
+					}
+				});
+				setTimeout(function() {
+					if (done) return;
+					done = true;
+					try { tizen.download.cancel(id); } catch (e) { /* already finished */ }
+					callback(new Error('download timed out'));
+				}, DOWNLOAD_TIMEOUT_MS);
+			});
+		}
+
+		// GET a JSON API. Some APIs (e.g. Wallhaven) don't allow cross-origin requests,
+		// so fall back to downloading the response as a file and reading it.
+		function fetchJSON(url, callback) {
+			var xhr = new XMLHttpRequest();
+			var fallback = function() {
+				var name = 'api-' + Date.now() + '.json';
+				downloadTo(url, TMP_DIR, name, function(err, saved) {
+					if (err) return callback(err);
+					readText('downloads/' + TMP_DIR + '/' + saved, function(err, text) {
+						deleteFile(TMP_DIR, saved);
+						if (err) return callback(err);
+						try { callback(null, JSON.parse(text)); } catch (e) { callback(e); }
+					});
+				});
+			};
+			xhr.open('GET', url);
+			xhr.timeout = 20000;
+			xhr.onload = function() {
+				if (xhr.status === 401 || xhr.status === 403) return callback(new Error('access denied (check the API key)'));
+				if (xhr.status !== 200) return callback(new Error('HTTP ' + xhr.status));
+				try { callback(null, JSON.parse(xhr.responseText)); } catch (e) { callback(e); }
+			};
+			xhr.onerror = fallback;
+			xhr.ontimeout = fallback;
+			xhr.send();
+		}
+
+		function ping(url) {
+			try {
+				var xhr = new XMLHttpRequest();
+				xhr.open('GET', url);
+				xhr.send();
+			} catch (e) {
+				// best effort
+			}
+		}
+
+		function shuffle(list) {
+			for (var i = list.length - 1; i > 0; i--) {
+				var j = Math.floor(Math.random() * (i + 1));
+				var t = list[i]; list[i] = list[j]; list[j] = t;
+			}
+			return list;
+		}
+
+		// ---------- sources ----------
+		// "zip": the user's ZIP link, extracted into one of two folders and swapped on success.
+		// Online sources keep a manifest of downloaded photos in their own folder, so nothing
+		// is downloaded twice; each update adds a few and drops the oldest beyond the limit.
+
+		function sourceOn(id) {
+			return setting('src_' + id, '0') === '1';
+		}
+
+		function sourceLabel(id) {
+			return labelFor(SOURCES, id);
+		}
+
+		function onlineDir(id) {
+			return 'backdrop-' + id;
+		}
+
+		function getManifest(id) {
+			try {
+				return JSON.parse(localStorage.getItem('manifest_' + id)) || [];
+			} catch (e) {
+				return [];
+			}
+		}
+
+		function setManifest(id, list) {
+			localStorage.setItem('manifest_' + id, JSON.stringify(list));
+		}
+
+		// multi-select settings (themes, categories) are stored as JSON arrays
+		function getList(key) {
+			try {
+				return JSON.parse(localStorage.getItem(key)) || [];
+			} catch (e) {
+				return [];
+			}
+		}
+
+		function activeDir() {
+			return setting('activeDir', '');
+		}
+
+		function loadSource(id, callback) {
+			if (id === 'zip') {
+				if (!activeDir()) return callback([]);
+				// ZIP images are copied (not moved) into favorites, since the ZIP folder gets replaced;
+				// hide the original so a favorite only shows once
+				var favorited = {};
+				getManifest('favorites').forEach(function(m) {
+					if (m.origin === 'zip') favorited[m.file] = true;
+				});
+				return listImages(activeDir(), function(err, files) {
+					callback(err ? [] : files.filter(function(f) {
+						return !favorited['zip-' + f.file];
+					}).map(function(f) {
+						return { name: 'zip/' + f.file, file: f.file, label: f.file, uri: f.uri, credit: '', source: 'zip', origin: 'zip' };
+					}));
+				});
+			}
+			listImages(onlineDir(id), function(err, files) {
+				var byFile = {};
+				(err ? [] : files).forEach(function(f) { byFile[f.file] = f.uri; });
+				// drop manifest entries whose file has gone
+				var manifest = getManifest(id).filter(function(m) { return byFile[m.file]; });
+				setManifest(id, manifest);
+				// online sources show only the selected themes (hidden ones stay saved)
+				var shown = id === 'favorites' ? manifest : visibleEntries(id, manifest);
+				callback(shown.map(function(m) {
+					var img = {
+						name: id + '/' + m.file,
+						file: m.file,
+						key: m.key,
+						uri: byFile[m.file],
+						thumb: m.thumb,
+						credit: m.credit,
+						// favorites remember where they came from (for the credit and for un-favoriting)
+						origin: m.origin || id,
+						author: m.author || authorFrom(m.credit),
+						source: id
+					};
+					img.label = (id === 'favorites' ? '♥ ' : '') + (creditText(img) || m.file);
+					return img;
+				}));
+			});
+		}
+
+		// v2.6 manifests only stored "Photo by <name> on Unsplash"
+		function authorFrom(credit) {
+			var m = /^Photo by (.+) on Unsplash$/.exec(credit || '');
+			return m ? m[1] : '';
+		}
+
+		// short credit for the corner: the site, plus the photographer where the site requires it
+		function creditText(img) {
+			if (!img) return '';
+			if (img.origin === 'unsplash') return (img.author ? img.author + ' · ' : '') + 'Unsplash';
+			if (img.origin === 'picsum') return 'Picsum';
+			if (img.origin === 'wallhaven') return 'Wallhaven';
+			return '';
+		}
+
+		function favoritesOnly() {
+			return setting('favOnly', '0') === '1';
+		}
+
+		// local copy of every enabled source, in source order. Favorites are always loaded (for the
+		// Favorites settings page) but only join the slideshow when that source or Favorites only is on.
+		function loadAll(callback) {
+			var all = [];
+			var ids = SOURCES.map(function(s) { return s.id; }).filter(function(id) {
+				return id === 'favorites' || sourceOn(id);
+			});
+			(function next(i) {
+				if (i >= ids.length) return callback(all);
+				loadSource(ids[i], function(list) {
+					if (ids[i] === 'favorites') {
+						favoriteImages = list;
+						if (!sourceOn('favorites') && !favoritesOnly()) list = [];
+					}
+					all = all.concat(list);
+					next(i + 1);
+				});
+			})(0);
+		}
+
+		// keepName: keep showing this image (e.g. it just moved into favorites under a new name)
+		function reloadImages(callback, keepName) {
+			loadAll(function(list) {
+				setImages(list, keepName);
+				if (callback) callback();
+			});
+		}
+
+		// ----- themes and groups -----
+		// Online images remember the theme they were fetched for (and Wallhaven, the category).
+		// A "group" is one selected choice: an Unsplash theme, or a Wallhaven category + theme pair
+		// (Picsum has a single group). Only images of selected groups are shown; unselecting a theme or
+		// category hides its images but keeps them, so selecting it again needs no download. The limit
+		// is split evenly across the selected groups.
+
+		var THEME_SETTING = { unsplash: 'unsplashThemes', wallhaven: 'whThemes' };
+
+		function sourceThemes(id) {
+			if (!THEME_SETTING[id]) return [''];
+			var themes = getList(THEME_SETTING[id]);
+			if (themes.length) return themes;
+			return id === 'unsplash' ? ['nature'] : ['']; // Wallhaven: none selected = any
+		}
+
+		function wallhavenCategories() {
+			var chosen = getList('whCategories');
+			return chosen.length ? chosen : ['general'];
+		}
+
+		// the selected groups, each with its share of the limit, e.g. 20 over 3 groups = 7, 7, 6
+		function sourceGroups(id) {
+			var groups = [];
+			sourceThemes(id).forEach(function(theme) {
+				if (id === 'wallhaven') {
+					wallhavenCategories().forEach(function(category) {
+						groups.push({ key: theme + '|' + category, theme: theme, category: category });
+					});
+				} else {
+					groups.push({ key: theme, theme: theme });
+				}
+			});
+			var keep = Number(setting('keep', '20'));
+			groups.forEach(function(g, i) {
+				g.quota = Math.floor(keep / groups.length) + (i < keep % groups.length ? 1 : 0);
+			});
+			return groups;
+		}
+
+		// which group a saved image belongs to, or null if it was saved before themes were tracked
+		// (those are hidden and cleared on the source's next update)
+		function groupOf(id, m) {
+			if (THEME_SETTING[id] && m.theme === undefined) return null;
+			var theme = m.theme === undefined ? '' : m.theme;
+			return id === 'wallhaven' ? theme + '|' + (m.category || '') : theme;
+		}
+
+		function groupEntries(id, list, key) {
+			return list.filter(function(m) { return groupOf(id, m) === key; })
+				.sort(function(a, b) { return b.added - a.added; }); // newest first
+		}
+
+		// the images to show: per selected group, the newest up to its share of the limit
+		function visibleEntries(id, manifest) {
+			var shown = [];
+			sourceGroups(id).forEach(function(g) {
+				shown = shown.concat(groupEntries(id, manifest, g.key).slice(0, g.quota));
+			});
+			return shown.sort(function(a, b) { return a.added - b.added; });
+		}
+
+		// ----- candidates: [{key, url, thumb, credit, author, category?, ping?}] for one group -----
+
+		function picsumCandidates(group, count, have, callback) {
+			var page = 1 + Math.floor(Math.random() * 10);
+			fetchJSON('https://picsum.photos/v2/list?limit=100&page=' + page, function(err, list) {
+				if (err) return callback(err);
+				callback(null, shuffle(list.filter(function(p) {
+					return p.width / p.height >= 1.4 && !have['p' + p.id];
+				})).slice(0, count).map(function(p) {
+					return {
+						key: 'p' + p.id,
+						url: 'https://picsum.photos/id/' + p.id + '/3840/2160.jpg',
+						thumb: 'https://picsum.photos/id/' + p.id + '/384/216.jpg',
+						credit: 'Photo by ' + p.author + ' on Unsplash',
+						author: p.author
+					};
+				}));
+			});
+		}
+
+		function unsplashCandidates(group, count, have, callback) {
+			if (!UNSPLASH_KEY) return callback(new Error('needs an Unsplash access key'));
+			fetchJSON('https://api.unsplash.com/photos/random?orientation=landscape&content_filter=high' +
+				'&count=' + Math.min(30, count) + '&query=' + encodeURIComponent(group.theme) +
+				'&client_id=' + encodeURIComponent(UNSPLASH_KEY), function(err, photos) {
+				if (err) return callback(err);
+				callback(null, photos.filter(function(p) { return !have['u' + p.id]; }).map(function(p) {
+					return {
+						key: 'u' + p.id,
+						url: p.urls.raw + '&w=3840&h=2160&fit=crop&crop=entropy&fm=jpg&q=80',
+						thumb: p.urls.small,
+						credit: 'Photo by ' + p.user.name + ' on Unsplash',
+						author: p.user.name,
+						// Unsplash asks apps to report downloads
+						ping: p.links.download_location + '&client_id=' + encodeURIComponent(UNSPLASH_KEY)
+					};
+				}).slice(0, count));
+			});
+		}
+
+		function wallhavenCandidates(group, count, have, callback) {
+			// this group's one category as Wallhaven's bit string, e.g. Anime = "010"
+			var categories = WALLHAVEN_CATEGORIES.map(function(c) {
+				return c.value === group.category ? '1' : '0';
+			}).join('');
+			var seed = Math.random().toString(36).slice(2, 8);
+			fetchJSON('https://wallhaven.cc/api/v1/search?purity=100&atleast=3840x2160&ratios=16x9' +
+				'&sorting=random&seed=' + seed + '&categories=' + categories +
+				(group.theme ? '&q=' + encodeURIComponent(group.theme) : ''), function(err, result) {
+				if (err) return callback(err);
+				callback(null, (result.data || []).filter(function(w) { return !have['w' + w.id]; })
+					.slice(0, count).map(function(w) {
+						return {
+							key: 'w' + w.id, url: w.path, thumb: w.thumbs && w.thumbs.small,
+							credit: 'Wallhaven', author: '', category: w.category
+						};
+					}));
+			});
+		}
+
+		var CANDIDATES = { picsum: picsumCandidates, unsplash: unsplashCandidates, wallhaven: wallhavenCandidates };
+
+		// ----- refreshing -----
+		// mode 'auto':   startup, timer, theme/limit changes - fill what's missing; a scheduled update
+		//                when one is due
+		// mode 'update': "Update all now" - a scheduled update right away
+		// mode 'reload': a source's Reload button - a fresh set, then delete that source's older images
+
+		function refreshZip(mode, callback) {
+			var url = setting('playout_url', '');
+			if (!url) return callback(new Error('no link set'));
+			var due = Date.now() - Number(setting('lastUpdated', '0')) >= ZIP_REFRESH_MS;
+			if (mode === 'auto' && !due && activeDir()) return callback(null);
+
+			download(url, function(err, zipPath) {
+				if (err) return callback(err);
+				var target = activeDir() === DIRS[0] ? DIRS[1] : DIRS[0];
+				unpack(zipPath, target, function(err) {
+					removeDir(TMP_DIR, function() {});
+					if (err) return callback(err);
+					listImages(target, function(err, list) {
+						if (err) return callback(err);
+						if (!list.length) return callback(new Error('ZIP has no images'));
+						var old = activeDir();
+						localStorage.setItem('activeDir', target);
+						localStorage.setItem('lastUpdated', String(Date.now()));
+						if (old) removeDir(old, function() {});
+						callback(null);
+					});
+				});
+			});
+		}
+
+		function dropEntries(id, files) {
+			if (!files.length) return;
+			files.forEach(function(file) { deleteFile(onlineDir(id), file); });
+			setManifest(id, getManifest(id).filter(function(m) { return files.indexOf(m.file) === -1; }));
+		}
+
+		// ----- hidden images and storage -----
+		// "Hidden" = saved but not shown when the source is on: unselected themes/categories, beyond a
+		// share, or saved before themes were tracked. They make re-selecting instant, so they're kept,
+		// but each source keeps at most as many as the limit (oldest go first, at scheduled updates).
+
+		var ONLINE_SOURCES = ['picsum', 'unsplash', 'wallhaven'];
+
+		function hiddenEntries(id, list) {
+			var shown = {};
+			visibleEntries(id, list).forEach(function(m) { shown[m.file] = true; });
+			return list.filter(function(m) { return !shown[m.file]; });
+		}
+
+		function capHidden(id) {
+			var hidden = hiddenEntries(id, getManifest(id)).sort(function(a, b) { return a.added - b.added; });
+			var extra = hidden.length - Number(setting('keep', '20'));
+			if (extra > 0) dropEntries(id, hidden.slice(0, extra).map(function(m) { return m.file; }));
+		}
+
+		function clearHidden() {
+			var count = 0;
+			ONLINE_SOURCES.forEach(function(id) {
+				var hidden = hiddenEntries(id, getManifest(id));
+				count += hidden.length;
+				dropEntries(id, hidden.map(function(m) { return m.file; }));
+			});
+			return count;
+		}
+
+		function hiddenCount() {
+			return ONLINE_SOURCES.reduce(function(n, id) { return n + hiddenEntries(id, getManifest(id)).length; }, 0);
+		}
+
+		// bytes used per Backdrop folder; callback({ folder: bytes, ... })
+		var storageInfo = null;
+
+		function measureStorage(callback) {
+			var folders = ONLINE_SOURCES.concat(['favorites']).map(onlineDir);
+			if (activeDir()) folders.push(activeDir());
+			var sizes = {};
+			(function next(i) {
+				if (i >= folders.length) return callback(sizes);
+				tizen.filesystem.resolve('downloads/' + folders[i], function(dir) {
+					dir.listFiles(function(files) {
+						sizes[folders[i]] = files.reduce(function(n, f) { return n + (f.isFile ? f.fileSize || 0 : 0); }, 0);
+						next(i + 1);
+					}, function() { next(i + 1); });
+				}, function() { sizes[folders[i]] = 0; next(i + 1); }, 'r');
+			})(0);
+		}
+
+		function formatMB(bytes) {
+			var mb = (bytes || 0) / 1e6;
+			return (mb >= 10 ? Math.round(mb) : mb.toFixed(1)) + ' MB';
+		}
+
+		// measure, then fill in the General tab's storage figures if it's on screen
+		function updateStorage() {
+			measureStorage(function(sizes) {
+				storageInfo = sizes;
+				var total = 0;
+				Object.keys(sizes).forEach(function(k) { total += sizes[k]; });
+				document.querySelectorAll('[data-storage]').forEach(function(node) {
+					var key = node.getAttribute('data-storage');
+					node.textContent = key === 'total' ? formatMB(total) :
+						formatMB(sizes[key === 'zip' ? activeDir() : onlineDir(key)]);
+				});
+			});
+		}
+
+		// Delete files in a source's folder that aren't in its manifest (e.g. a download that timed
+		// out half-way). Only call this when none of the source's downloads are in progress.
+		function cleanOrphans(id, callback) {
+			var known = {};
+			getManifest(id).forEach(function(m) { known[m.file] = true; });
+			tizen.filesystem.resolve('downloads/' + onlineDir(id), function(dir) {
+				dir.listFiles(function(files) {
+					files.forEach(function(f) {
+						if (f.isFile && !known[f.name]) deleteFile(onlineDir(id), f.name);
+					});
+					callback();
+				}, function() { callback(); });
+			}, function() { callback(); }, 'r');
+		}
+
+		function refreshOnline(id, mode, callback) {
+			var groups = sourceGroups(id);
+			var hours = Number(setting('fetchEvery', '24'));
+			var due = mode === 'update' ||
+				(hours > 0 && Date.now() - Number(setting('lastFetch_' + id, '0')) >= hours * HOUR_MS);
+			var before = getManifest(id);
+			var batch = Math.max(1, Math.ceil(BATCH / groups.length));
+
+			// what to download, per selected group
+			var tasks = [];
+			groups.forEach(function(g) {
+				var have = groupEntries(id, before, g.key).length;
+				var count = mode === 'reload' ? g.quota : Math.max(0, g.quota - have);
+				if (!count && due) count = Math.min(batch, g.quota); // full: add a few new ones
+				if (count) tasks.push({ group: g, count: count });
+			});
+
+			var finish = function(err, added) {
+				if (added) {
+					localStorage.setItem('lastFetch_' + id, String(Date.now()));
+					if (mode === 'reload') {
+						// a fresh set arrived: older images go, whatever their theme
+						var oldFiles = before.map(function(m) { return m.file; });
+						dropEntries(id, oldFiles);
+					}
+				}
+				if (mode !== 'reload' && due) {
+					// only on a scheduled update ("Update all now" or the timer) - never after a fill from
+					// a selection change, which must not delete anything. Selected groups keep the newest
+					// up to their share; unselected ones are kept. Images saved before themes were
+					// tracked are cleared now.
+					var drop = [];
+					var list = getManifest(id);
+					groups.forEach(function(g) {
+						groupEntries(id, list, g.key).slice(g.quota).forEach(function(m) { drop.push(m.file); });
+					});
+					list.forEach(function(m) { if (groupOf(id, m) === null) drop.push(m.file); });
+					dropEntries(id, drop);
+					capHidden(id); // hidden images: at most as many as the limit, oldest go first
+				}
+				cleanOrphans(id, function() { callback(err); });
+			};
+			if (!tasks.length) return finish(null, 0);
+
+			var haveKeys = {};
+			before.forEach(function(m) { haveKeys[m.key] = true; });
+			var added = 0;
+			var offered = 0;
+			(function nextTask(t) {
+				if (t >= tasks.length) {
+					// nothing new on offer is fine; offering images but failing every download isn't
+					return finish(added || !offered ? null : new Error('downloads failed'), added);
+				}
+				var task = tasks[t];
+				CANDIDATES[id](task.group, task.count, haveKeys, function(err, items) {
+					if (err) return finish(err, added);
+					offered += items.length;
+					(function next(i) {
+						if (i >= items.length) return nextTask(t + 1);
+						var item = items[i];
+						haveKeys[item.key] = true;
+						var ext = (item.url.split('?')[0].match(/\.(jpg|jpeg|png|webp)$/i) || ['.jpg'])[0];
+						downloadTo(item.url, onlineDir(id), item.key + ext, function(err, saved) {
+							if (!err) {
+								var list = getManifest(id);
+								list.push({
+									key: item.key, file: saved, thumb: item.thumb, credit: item.credit,
+									author: item.author || '', theme: task.group.theme, category: item.category || task.group.category,
+									added: Date.now()
+								});
+								setManifest(id, list);
+								added++;
+								if (item.ping) ping(item.ping);
+								if (!images.length) reloadImages(); // first images: show them right away
+							}
+							next(i + 1);
+						});
+					})(0);
+				});
+			})(0);
+		}
+
+		var pendingRefresh = false;
+
+		// Update the enabled sources (or just `only`), one at a time.
+		function refreshAll(mode, callback, only) {
+			callback = callback || function() {};
+			if (refreshing) {
+				pendingRefresh = true; // e.g. themes changed mid-download: catch up afterwards
+				return callback();
+			}
+			refreshing = true;
+			if (settingsOpen) renderStatus();
+			if (!images.length) showMessage('Downloading images…');
+
+			// favorites are only ever added by hand
+			var ids = SOURCES.map(function(s) { return s.id; }).filter(function(id) {
+				return id !== 'favorites' && sourceOn(id) && (!only || only.indexOf(id) !== -1);
+			});
+			(function next(i) {
+				if (i >= ids.length) {
+					refreshing = false;
+					reloadImages(function() {
+						// forget "unselected" marks for images that no longer exist (hidden images still
+						// exist; marks for sources that are switched off are kept for when they come back)
+						var present = {};
+						images.forEach(function(img) { present[img.name] = true; });
+						Object.keys(CANDIDATES).forEach(function(id) {
+							getManifest(id).forEach(function(m) { present[id + '/' + m.file] = true; });
+						});
+						var excluded = getExcluded();
+						var kept = excluded.filter(function(name) {
+							return present[name] || !sourceOn(name.split('/')[0]);
+						});
+						if (kept.length !== excluded.length) setExcluded(kept);
+
+						if (!images.length) {
+							showMessage(ids.length ? 'Could not download images. Retrying soon…'
+								: 'No image sources selected. Press Play/Pause for settings.');
+						}
+						if (settingsOpen) renderSettings();
+						callback();
+						if (pendingRefresh) {
+							pendingRefresh = false;
+							refreshAll('auto');
+						}
+					});
+					return;
+				}
+				var id = ids[i];
+				var run = id === 'zip' ? refreshZip.bind(null, mode) : refreshOnline.bind(null, id, mode);
+				run(function(err) {
+					if (err) sourceErrors[id] = String(err.message || err.name || err);
+					else delete sourceErrors[id];
+					reloadImages(function() { next(i + 1); }); // show each source's images as they arrive
+				});
+			})(0);
+		}
+
+		// theme/category changes: show what's already saved now, download the shortfall shortly after
+		// (waits for the selection to settle, so tapping through several themes starts one download)
+		var themeTimer = null;
+
+		function themesChanged() {
+			reloadImages();
+			clearTimeout(themeTimer);
+			themeTimer = setTimeout(function() { refreshAll('auto'); }, 1200);
 		}
 
 		function download(url, callback) {
@@ -338,99 +1483,34 @@
 			});
 		}
 
-		// ---------- local copy + refresh ----------
-
-		function activeDir() {
-			return setting('activeDir', '');
-		}
-
-		function loadLocalCopy(callback) {
-			var dirName = activeDir();
-			if (!dirName) return callback(null, []);
-			listImages(dirName, function(err, list) {
-				callback(null, err ? [] : list);
-			});
-		}
-
-		function ask(callback) {
-			var url = localStorage.getItem('playout_url');
-			if (url) return callback(url);
-
-			setTimeout(function() {
-				var input = prompt('Enter URL of a ZIP file with images', '');
-				if (!input) {
-					// keep the slideshow if we have one; otherwise ask again
-					if (images.length) return callback(null);
-					return ask(callback);
-				}
-				input = input.replace(/&amp;/g, '&');
-				localStorage.setItem('playout_url', input);
-				callback(input);
-			}, 100);
-		}
-
-		// Download the ZIP and extract into the inactive dir; the current images
-		// stay untouched unless the new set is complete.
-		function refresh(callback) {
-			callback = callback || function() {};
-			if (refreshing) return callback(new Error('already refreshing'));
-			refreshing = true;
-
-			function finish(err) {
-				refreshing = false;
-				lastRefreshError = err ? String(err.message || err.name || err) : null;
-				if (settingsOpen) renderStatus();
-				callback(err || null);
-			}
-
-			ask(function(url) {
-				if (!url) return finish(new Error('no URL'));
-
-				download(url, function(err, zipPath) {
-					if (err) return finish(err);
-
-					var target = activeDir() === DIRS[0] ? DIRS[1] : DIRS[0];
-					unpack(zipPath, target, function(err) {
-						removeDir(TMP_DIR, function() {});
-						if (err) return finish(err);
-
-						listImages(target, function(err, list) {
-							if (err) return finish(err);
-							if (!list.length) return finish(new Error('ZIP has no images'));
-
-							var old = activeDir();
-							localStorage.setItem('activeDir', target);
-							localStorage.setItem('lastUpdated', String(Date.now()));
-							usingOfflineCopy = false;
-							setImages(list);
-							if (old) removeDir(old, function() {});
-							finish(null);
-						});
-					});
-				});
-			});
-		}
-
 		// ---------- slideshow ----------
 
 		function layers() {
 			return [document.getElementById('layer0'), document.getElementById('layer1')];
 		}
 
-		function setImages(list) {
-			var current = playlist[slideIndex] && playlist[slideIndex].name;
+		function setImages(list, keepName) {
+			var current = keepName || (playlist[slideIndex] && playlist[slideIndex].name);
+			var changed = list.length !== images.length || list.some(function(img, i) {
+				return img.name !== images[i].name || img.uri !== images[i].uri;
+			});
 			images = list;
-			rebuildPlaylist(current);
-			if (settingsOpen) renderSettings();
+			if (changed || !playlist.length) rebuildPlaylist(current);
 		}
 
 		function rebuildPlaylist(keepName) {
 			var excluded = getExcluded();
-			playlist = images.filter(function(img) { return excluded.indexOf(img.name) === -1; });
-			if (!playlist.length) playlist = images.slice(); // never show an empty screen
+			var pool = images;
+			if (favoritesOnly()) {
+				var favorites = images.filter(function(img) { return img.source === 'favorites'; });
+				if (favorites.length) pool = favorites; // no favorites yet: show everything
+			}
+			playlist = pool.filter(function(img) { return excluded.indexOf(img.name) === -1; });
+			if (!playlist.length) playlist = pool.slice(); // never show an empty screen
+			if (setting('order', 'name') === 'shuffle') shuffle(playlist);
 
 			if (!playlist.length) {
-				showMessage('No images yet');
+				if (!refreshing) showMessage('No images yet');
 				return;
 			}
 			hideMessage();
@@ -444,13 +1524,13 @@
 				nextSlide();
 			} else {
 				slideIndex = idx;
-				// same image object may have a new URI after a refresh
-				showImage(playlist[idx].uri, 'none');
+				// same image may have a new URI after a refresh
+				showImage(playlist[idx], 'none');
 				scheduleNext();
 			}
 		}
 
-		function showImage(uri, transition) {
+		function showImage(entry, transition) {
 			var ls = layers();
 			var front = ls[frontLayer];
 			var back = ls[1 - frontLayer];
@@ -459,12 +1539,93 @@
 				back.onload = null;
 				animate(front, back, transition || setting('transition', 'fade'));
 				frontLayer = 1 - frontLayer;
+				showCredit(entry);
 			};
 			back.onerror = function() {
 				back.onerror = null;
 				scheduleNext(); // skip broken image on next tick
 			};
-			back.src = uri;
+			back.src = entry.uri;
+		}
+
+		// bottom-left corner: ♥ for favorites, then the short credit (if credits are on)
+		function showCredit(entry) {
+			var credit = document.getElementById('credit');
+			var parts = [];
+			if (entry && entry.source === 'favorites') parts.push('♥');
+			if (setting('showCredits', '1') === '1' && creditText(entry)) parts.push(creditText(entry));
+			var value = parts.join('  ');
+			if (credit.textContent !== value) credit.textContent = value;
+		}
+
+		// ---------- favorites ----------
+		// OK in the slideshow saves the current image to downloads/backdrop-favorites (moved for online
+		// sources, so its source downloads a replacement; copied for the ZIP, which can be replaced).
+		// Favorites are never refreshed or cleaned up. OK again on a favorite gives it back.
+
+		var toastTimer = null;
+
+		function toast(text) {
+			var t = document.getElementById('toast');
+			t.textContent = text;
+			t.classList.add('show');
+			clearTimeout(toastTimer);
+			toastTimer = setTimeout(function() { t.classList.remove('show'); }, 1600);
+		}
+
+		function transferFile(from, to, copy, callback) {
+			resolveDownloads(function(dir) {
+				try {
+					dir[copy ? 'copyTo' : 'moveTo'](from, to, false, function() { callback(null); }, callback);
+				} catch (e) {
+					callback(e);
+				}
+			}, callback);
+		}
+
+		// OK only ever adds; removing happens in Settings → Favorites, so a stray press can't lose one
+		function toggleFavorite() {
+			var img = playlist[slideIndex];
+			if (!img) return;
+			if (img.source === 'favorites') return toast('♥ Already a favorite · manage it in Settings → Favorites');
+			favorite(img);
+		}
+
+		function favorite(img) {
+			var fromZip = img.source === 'zip';
+			var file = fromZip ? 'zip-' + img.file : img.file;
+			var favorites = getManifest('favorites');
+			if (favorites.some(function(m) { return m.file === file; })) return toast('♥ Already in favorites');
+
+			makeDir(onlineDir('favorites'), function() {
+				var from = 'downloads/' + (fromZip ? activeDir() : onlineDir(img.source)) + '/' + img.file;
+				transferFile(from, 'downloads/' + onlineDir('favorites') + '/' + file, fromZip, function(err) {
+					if (err) return toast('Could not save to favorites');
+					if (!fromZip) {
+						// the source no longer owns it; it fetches a replacement on its next update
+						setManifest(img.source, getManifest(img.source).filter(function(m) { return m.file !== img.file; }));
+					}
+					var list = getManifest('favorites');
+					list.push({
+						key: img.key || file, file: file, thumb: img.thumb, credit: img.credit || '',
+						author: img.author || '', origin: img.origin || img.source, added: Date.now()
+					});
+					setManifest('favorites', list);
+					toast('♥ Saved to favorites');
+					reloadImages(null, sourceOn('favorites') || favoritesOnly() ? 'favorites/' + file : null);
+				});
+			});
+		}
+
+		// Permanently delete favorites from the TV (Settings → Favorites, after a confirm press)
+		function deleteFavorites(files) {
+			files.forEach(function(file) { deleteFile(onlineDir('favorites'), file); });
+			setManifest('favorites', getManifest('favorites').filter(function(m) {
+				return files.indexOf(m.file) === -1;
+			}));
+			var names = files.map(function(file) { return 'favorites/' + file; });
+			setExcluded(getExcluded().filter(function(n) { return names.indexOf(n) === -1; }));
+			toast('Deleted ' + files.length + (files.length === 1 ? ' favorite' : ' favorites'));
 		}
 
 		function animate(outEl, inEl, kind) {
@@ -503,6 +1664,9 @@
 			}
 
 			setTimeout(function() {
+				// a newer change may have already brought this layer back to the front
+				// (e.g. Left/Right pressed during the transition); never hide the visible one
+				if (outEl === layers()[frontLayer]) return;
 				outEl.style.transition = 'none';
 				outEl.classList.remove('shown');
 				outEl.style.transform = 'none';
@@ -523,14 +1687,14 @@
 		function nextSlide() {
 			if (!playlist.length) return;
 			slideIndex = (slideIndex + 1) % playlist.length;
-			showImage(playlist[slideIndex].uri);
+			showImage(playlist[slideIndex]);
 			scheduleNext();
 		}
 
 		function prevSlide() {
 			if (!playlist.length) return;
 			slideIndex = (slideIndex - 1 + playlist.length) % playlist.length;
-			showImage(playlist[slideIndex].uri);
+			showImage(playlist[slideIndex]);
 			scheduleNext();
 		}
 
@@ -545,10 +1709,25 @@
 		}
 
 		// ---------- settings overlay ----------
+		// A main menu of sections; each section is its own page. Back returns to the menu.
+
+		var PAGES = [
+			{ id: 'slideshow', label: 'Display' },
+			{ id: 'clock', label: 'Clock' },
+			{ id: 'images', label: 'Images' },
+			{ id: 'favorites', label: 'Favorites' }
+		];
+		var settingsPage = 'main';
+		var favMarked = [];        // favorites marked for deletion on the Favorites page
+		var favConfirm = false;    // Delete pressed once; the next press deletes
+		var hiddenConfirm = false; // "Clear hidden images" pressed once; the next press clears
 
 		function openSettings() {
 			settingsOpen = true;
 			clearTimeout(slideTimer);
+			settingsPage = 'main';
+			focusRow = 0;
+			focusCol = 0;
 			renderSettings();
 			document.getElementById('overlay').classList.add('open');
 		}
@@ -560,6 +1739,40 @@
 			rebuildPlaylist(current);
 		}
 
+		var pageAnimation = ''; // 'forward' / 'back' (page change) or 'tab-forward' / 'tab-back' for the next render
+		var imagesTab = 'general'; // selected tab on the Images page
+		var IMAGE_TABS = [
+			{ label: 'General', value: 'general' },
+			{ label: 'Custom link', value: 'zip' },
+			{ label: 'Picsum', value: 'picsum' },
+			{ label: 'Unsplash', value: 'unsplash' },
+			{ label: 'Wallhaven', value: 'wallhaven' }
+		].map(function(t) { t.id = t.value; return t; });
+
+		function openPage(id) {
+			settingsPage = id;
+			focusRow = 0;
+			focusCol = 0;
+			if (id === 'images') { // start on the tab you were last on
+				IMAGE_TABS.forEach(function(t, i) { if (t.id === imagesTab) focusCol = i; });
+			}
+			favMarked = [];
+			favConfirm = false;
+			hiddenConfirm = false;
+			pageAnimation = 'forward';
+			renderSettings();
+		}
+
+		function backToMenu() {
+			var index = 0;
+			PAGES.forEach(function(p, i) { if (p.id === settingsPage) index = i; });
+			settingsPage = 'main';
+			focusRow = index;
+			focusCol = 0;
+			pageAnimation = 'back';
+			renderSettings();
+		}
+
 		function el(tag, cls, text) {
 			var e = document.createElement(tag);
 			if (cls) e.className = cls;
@@ -567,30 +1780,93 @@
 			return e;
 		}
 
+		function labelFor(options, value) {
+			for (var i = 0; i < options.length; i++) {
+				if (options[i].value === value) return options[i].label;
+			}
+			return value;
+		}
+
+		function selectedCount() {
+			var excluded = getExcluded();
+			return images.filter(function(img) { return excluded.indexOf(img.name) === -1; }).length;
+		}
+
+		// most recent successful update across the enabled sources
+		function formatUpdated() {
+			var updated = 0;
+			SOURCES.forEach(function(s) {
+				if (!sourceOn(s.id)) return;
+				var t = Number(setting(s.id === 'zip' ? 'lastUpdated' : 'lastFetch_' + s.id, '0'));
+				if (t > updated) updated = t;
+			});
+			if (!updated) return 'never updated';
+			var d = new Date(updated);
+			return 'updated ' + d.getDate() + ' ' + MONTHS[d.getMonth()].slice(0, 3) + ' ' +
+				('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+		}
+
+		// one-line summary shown next to each section in the main menu
+		function pageSummary(id) {
+			if (id === 'slideshow') {
+				return labelFor(DURATIONS, setting('timer', '10')) + '  ·  ' +
+					labelFor(TRANSITIONS, setting('transition', 'fade')) + '  ·  ' +
+					'Brightness ' + setting('brightness', '100') + '%';
+			}
+			if (id === 'clock') {
+				if (setting('clockShow', '0') !== '1') return 'Off';
+				return ['On',
+					setting('clockFormat', '12') === '24' ? '24-hour' : '12-hour',
+					setting('clockDate', '0') === '1' ? 'date' : null,
+					setting('clockSeconds', '0') === '1' ? 'seconds' : null
+				].filter(Boolean).join('  ·  ');
+			}
+			if (id === 'images') {
+				var on = SOURCES.filter(function(s) { return sourceOn(s.id); }).length;
+				return selectedCount() + ' of ' + images.length + ' selected  ·  ' +
+					on + (on === 1 ? ' source' : ' sources') + '  ·  ' +
+					(refreshing ? 'downloading…' : formatUpdated());
+			}
+			if (id === 'favorites') {
+				var n = favoriteImages.length;
+				return n + (n === 1 ? ' favorite' : ' favorites') + (favoritesOnly() ? '  ·  showing only favorites' : '');
+			}
+			return '';
+		}
+
 		function renderStatus() {
 			var status = document.getElementById('status');
 			if (!status) return;
 
-			var excluded = getExcluded();
-			var selected = images.filter(function(img) { return excluded.indexOf(img.name) === -1; }).length;
-			var updated = Number(setting('lastUpdated', '0'));
-			var parts = [
-				images.length + ' images',
-				selected + ' selected',
-				updated ? 'updated ' + new Date(updated).toLocaleString() : 'never updated'
-			];
+			var selected = selectedCount();
+			var parts = [images.length + ' images', selected + ' selected', formatUpdated()];
 			status.innerHTML = '';
 			status.appendChild(document.createTextNode(parts.join('  ·  ')));
 
+			var errors = Object.keys(sourceErrors).filter(sourceOn).map(function(id) {
+				return sourceLabel(id).replace(/ \(.*\)$/, '') + ': ' + sourceErrors[id];
+			});
 			var warn = null;
-			if (refreshing) warn = 'Checking for new images…';
-			else if (lastRefreshError) warn = 'Offline copy in use (update failed: ' + lastRefreshError + ')';
-			else if (usingOfflineCopy) warn = 'Offline copy in use';
+			if (refreshing) warn = 'Downloading new images…';
+			else if (errors.length) warn = errors.join('; ') + ' (saved images still shown)';
 			if (images.length && !selected) warn = 'No images selected: showing all';
 			if (warn) {
 				status.appendChild(document.createTextNode('  ·  '));
 				status.appendChild(el('span', 'warn', warn));
 			}
+		}
+
+		// ----- row builders: each returns the focusable elements of one row -----
+
+		function menuItem(parent, label, summary, action, value) {
+			var item = el('div', 'menu-item');
+			item.setAttribute('data-action', action);
+			if (value) item.setAttribute('data-value', value);
+			item.appendChild(el('span', 'label', label));
+			item.appendChild(el('span', 'summary', summary || ''));
+			if (action === 'open') item.appendChild(el('span', 'chevron', '›'));
+			parent.appendChild(item);
+			return [item];
 		}
 
 		function optionRow(parent, options, current, action) {
@@ -606,83 +1882,427 @@
 			return els;
 		}
 
+		// on/off switch stored as onValue/offValue under key
+		function switchRow(parent, key, label, onValue, offValue) {
+			onValue = onValue || '1';
+			offValue = offValue || '0';
+			var sw = el('div', 'switch-row' + (setting(key, offValue) === onValue ? ' on' : ''));
+			sw.setAttribute('data-action', 'switch');
+			sw.setAttribute('data-key', key);
+			sw.setAttribute('data-on', onValue);
+			sw.setAttribute('data-off', offValue);
+			sw.appendChild(el('span', 'label', label));
+			sw.appendChild(el('span', 'switch'));
+			parent.appendChild(sw);
+			return [sw];
+		}
+
+		function setSwitch(sw, on) {
+			var key = sw.getAttribute('data-key');
+			var before = localStorage.getItem(key);
+			localStorage.setItem(key, sw.getAttribute(on ? 'data-on' : 'data-off'));
+			sw.classList.toggle('on', on);
+			if (before === localStorage.getItem(key)) return;
+
+			if (key.indexOf('src_') === 0) {
+				// show/hide that source's images now; fetch if it was just turned on
+				reloadImages(function() {
+					renderSettings(); // shows/hides the source-specific options
+					if (on) refreshAll('auto');
+				});
+			} else if (key === 'showCredits') {
+				showCredit(playlist[slideIndex]);
+			} else if (key === 'favOnly') {
+				reloadImages(function() {
+					rebuildPlaylist(null); // start from the first favorite
+					if (on && !images.some(function(img) { return img.source === 'favorites'; })) {
+						toast('No favorites yet - press OK on an image to save it');
+					}
+				});
+			} else {
+				updateClock(); // live preview behind the overlay
+			}
+		}
+
+		// multi-select chips stored as a JSON list under key (themes, categories)
+		function chipRow(parent, options, key) {
+			var selected = getList(key);
+			var row = el('div', 'options');
+			var els = options.map(function(o) {
+				var b = el('div', 'btn chip' + (selected.indexOf(o.value) !== -1 ? ' selected' : ''), o.label);
+				b.setAttribute('data-action', 'chip');
+				b.setAttribute('data-key', key);
+				b.setAttribute('data-value', o.value);
+				row.appendChild(b);
+				return b;
+			});
+			parent.appendChild(row);
+			return els;
+		}
+
+		function sliderRow(parent, action) {
+			var row = el('div', 'options');
+			var slider = el('div', 'slider');
+			slider.setAttribute('data-action', action);
+			var track = el('div', 'track');
+			track.appendChild(el('div', 'fill'));
+			track.appendChild(el('div', 'knob'));
+			slider.appendChild(track);
+			slider.appendChild(el('div', 'value'));
+			row.appendChild(slider);
+			parent.appendChild(row);
+			updateSlider(slider);
+			return [slider];
+		}
+
+		function updateSlider(slider) {
+			var percent = Number(setting('brightness', '100'));
+			var pos = (percent - BRIGHTNESS_MIN) / (100 - BRIGHTNESS_MIN) * 100;
+			slider.querySelector('.fill').style.width = pos + '%';
+			slider.querySelector('.knob').style.left = pos + '%';
+			slider.querySelector('.value').textContent = percent + '%';
+		}
+
+		function adjustBrightness(slider, delta) {
+			var percent = Number(setting('brightness', '100')) + delta;
+			percent = Math.max(BRIGHTNESS_MIN, Math.min(100, percent));
+			localStorage.setItem('brightness', String(percent));
+			updateSlider(slider);
+			applyBrightness(); // live preview behind the overlay
+		}
+
+		function buttonRow(parent, buttons) {
+			var row = el('div', 'options actions');
+			var els = buttons.map(function(b) {
+				var e = el('div', 'btn', b[0]);
+				e.setAttribute('data-action', b[1]);
+				row.appendChild(e);
+				return e;
+			});
+			parent.appendChild(row);
+			return els;
+		}
+
+		// ----- pages -----
+
+		function renderPage(body) {
+			var rows = focusRows;
+
+			if (settingsPage === 'main') {
+				PAGES.forEach(function(p) {
+					rows.push(menuItem(body, p.label, pageSummary(p.id), 'open', p.id));
+				});
+				rows.push(menuItem(body, 'Close', '', 'close'));
+
+			} else if (settingsPage === 'slideshow') {
+				body.appendChild(el('div', 'section-label', 'Time per image'));
+				rows.push(optionRow(body, DURATIONS, setting('timer', '10'), 'timer'));
+				body.appendChild(el('div', 'section-label', 'Transition'));
+				rows.push(optionRow(body, TRANSITIONS, setting('transition', 'fade'), 'transition'));
+				body.appendChild(el('div', 'section-label', 'Brightness (◀ ▶ to adjust)'));
+				rows.push(sliderRow(body, 'brightness'));
+				body.appendChild(el('div', 'section-label', 'Order'));
+				rows.push(optionRow(body, ORDERS, setting('order', 'name'), 'order'));
+				rows.push(switchRow(body, 'showCredits', 'Show photo credits'));
+
+			} else if (settingsPage === 'favorites') {
+				rows.push(switchRow(body, 'src_favorites', 'Show favorites in the slideshow'));
+				rows.push(switchRow(body, 'favOnly', 'Favorites only'));
+				body.appendChild(el('div', 'hint', 'Press OK during the slideshow to save the current image to favorites.'));
+				body.appendChild(el('div', 'section-label', 'Your favorites  ·  OK to mark for deletion'));
+				var favGrid = el('div');
+				favGrid.id = 'grid';
+				var favRow = [];
+				favoriteImages.forEach(function(img, i) {
+					var t = el('div', 'thumb fav' + (favMarked.indexOf(img.file) === -1 ? '' : ' marked'));
+					t.setAttribute('data-action', 'favmark');
+					t.setAttribute('data-value', img.file);
+					var im = el('img');
+					im.loading = 'lazy';
+					im.onerror = function() { im.onerror = null; im.src = img.uri; };
+					im.src = img.thumb || img.uri;
+					t.appendChild(im);
+					t.appendChild(el('div', 'check', '✕'));
+					t.appendChild(el('div', 'name', creditText(img) || img.file));
+					favGrid.appendChild(t);
+					favRow.push(t);
+					if (favRow.length === GRID_COLS || i === favoriteImages.length - 1) {
+						rows.push(favRow);
+						favRow = [];
+					}
+				});
+				if (!favoriteImages.length) favGrid.appendChild(el('div', 'hint', 'No favorites yet.'));
+				body.appendChild(favGrid);
+				if (favoriteImages.length) {
+					var n = favMarked.length;
+					rows.push(buttonRow(body, [
+						[favConfirm ? 'Press OK again to delete ' + n : 'Delete marked (' + n + ')', 'favdelete'],
+						['Clear marks', 'favclear']
+					]));
+					body.appendChild(el('div', 'hint', 'Deleting removes the image from the TV for good.'));
+				}
+
+			} else if (settingsPage === 'clock') {
+				rows.push(switchRow(body, 'clockShow', 'Show clock'));
+				rows.push(switchRow(body, 'clockFormat', '24-hour clock', '24', '12'));
+				rows.push(switchRow(body, 'clockDate', 'Show date'));
+				rows.push(switchRow(body, 'clockSeconds', 'Show seconds'));
+				body.appendChild(el('div', 'section-label', 'Size'));
+				rows.push(optionRow(body, CLOCK_SIZES, setting('clockSize', 'm'), 'clockSize'));
+				body.appendChild(el('div', 'section-label', 'Position'));
+				rows.push(optionRow(body, CLOCK_POSITIONS, setting('clockPos', 'center'), 'clockPos'));
+
+			} else if (settingsPage === 'images' && imagesTab === 'general') {
+				// one line per source, then the settings shared by the online sources
+				body.appendChild(el('div', 'section-label', 'Sources'));
+				// storage figures are measured in the background and filled into [data-storage] spans
+				var sizeSpan = function(key) {
+					var s = el('span', '', storageInfo ? '' : '…');
+					s.setAttribute('data-storage', key);
+					return s;
+				};
+				IMAGE_TABS.slice(1).forEach(function(tab) {
+					var line = el('div', 'source-status');
+					var count = images.filter(function(img) { return img.source === tab.id; }).length;
+					var on = sourceOn(tab.id);
+					var parts = (on ? '●  ' : '○  ') + tab.label + '  ·  ' + (on ? count + (count === 1 ? ' image' : ' images') : 'off');
+					if (CANDIDATES[tab.id]) {
+						var hidden = hiddenEntries(tab.id, getManifest(tab.id)).length;
+						if (hidden) parts += '  ·  ' + hidden + ' hidden';
+					}
+					line.appendChild(el('span', on ? '' : 'off', parts + '  ·  '));
+					line.appendChild(sizeSpan(tab.id));
+					if (on && sourceErrors[tab.id]) {
+						line.appendChild(el('span', 'err', '  ·  ' + sourceErrors[tab.id]));
+					}
+					body.appendChild(line);
+				});
+				var favLine = el('div', 'source-status');
+				favLine.appendChild(el('span', '', '♥  Favorites  ·  ' + favoriteImages.length + '  ·  '));
+				favLine.appendChild(sizeSpan('favorites'));
+				body.appendChild(favLine);
+				var totalLine = el('div', 'source-status');
+				totalLine.appendChild(el('span', '', 'Storage used on the TV  ·  '));
+				totalLine.appendChild(sizeSpan('total'));
+				body.appendChild(totalLine);
+				updateStorage();
+				body.appendChild(el('div', 'hint', 'Turn sources on and off in their own tabs.'));
+				body.appendChild(el('div', 'section-label', 'Images kept per online source'));
+				rows.push(optionRow(body, KEEP_OPTIONS, setting('keep', '20'), 'keep'));
+				body.appendChild(el('div', 'section-label', 'Get new online images'));
+				rows.push(optionRow(body, FETCH_OPTIONS, setting('fetchEvery', '24'), 'fetchEvery'));
+				body.appendChild(el('div', 'section-label', ''));
+				var hiddenTotal = hiddenCount();
+				rows.push(buttonRow(body, [
+					['Update all now', 'refresh'],
+					[hiddenConfirm ? 'Press OK again to clear ' + hiddenTotal : 'Clear hidden images (' + hiddenTotal + ')', 'clearhidden']
+				]));
+				body.appendChild(el('div', 'hint', 'Update all now adds a few new images to every source. Hidden images are ' +
+					'from unselected themes or categories - kept so selecting them again is instant, at most as many ' +
+					'per source as the limit. Clearing them frees space; favorites are never touched.'));
+
+			} else if (settingsPage === 'images') {
+				// a single source: its switch, its own options, its images
+				var src = imagesTab;
+				var tabLabel = labelFor(IMAGE_TABS, src);
+				rows.push(switchRow(body, 'src_' + src, 'Use ' + tabLabel));
+
+				if (src === 'zip' && sourceOn('zip')) {
+					body.appendChild(el('div', 'section-label', 'ZIP link (checked on start and every 6 hours)'));
+					rows.push(buttonRow(body, [['Change URL', 'url']]));
+				} else if (src === 'unsplash' && sourceOn('unsplash')) {
+					body.appendChild(el('div', 'section-label', 'Themes  ·  OK to select / unselect'));
+					rows.push(chipRow(body, UNSPLASH_THEMES, 'unsplashThemes'));
+					if (!UNSPLASH_KEY) {
+						body.appendChild(el('div', 'hint', 'Needs an Unsplash access key in config.local.json - see the README.'));
+					}
+				} else if (src === 'wallhaven' && sourceOn('wallhaven')) {
+					body.appendChild(el('div', 'section-label', 'Categories'));
+					rows.push(chipRow(body, WALLHAVEN_CATEGORIES, 'whCategories'));
+					body.appendChild(el('div', 'section-label', 'Themes  ·  none selected = any'));
+					rows.push(chipRow(body, UNSPLASH_THEMES, 'whThemes'));
+				}
+				if ((src === 'unsplash' || src === 'wallhaven') && sourceOn(src)) {
+					var what = src === 'wallhaven' ? 'categories and themes' : 'themes';
+					body.appendChild(el('div', 'hint', 'Only the selected ' + what + ' are shown, sharing the limit equally. ' +
+						'Unselected ones keep their images; missing ones download shortly after a change.'));
+				}
+				if (sourceOn(src) && sourceErrors[src]) {
+					body.appendChild(el('div', 'hint', 'Last update failed: ' + sourceErrors[src] + ' (saved images still shown)'));
+				}
+
+				if (!sourceOn(src)) {
+					body.appendChild(el('div', 'hint', 'Turn it on to use its images in the slideshow.'));
+					return;
+				}
+				body.appendChild(el('div', 'section-label', ''));
+				var reloadButtons = buttonRow(body, [['Reload ' + tabLabel, 'reloadsrc']]);
+				reloadButtons[0].setAttribute('data-value', src);
+				rows.push(reloadButtons);
+				body.appendChild(el('div', 'hint', src === 'zip'
+					? 'Downloads the ZIP again and replaces its images.'
+					: 'Downloads a fresh set for the selected themes, then deletes this source\'s older images ' +
+						'(including unselected themes). Favorites are kept.'));
+
+				var sourceImages = images.filter(function(img) { return img.source === src; });
+				body.appendChild(el('div', 'section-label', 'Images  ·  OK to select / unselect'));
+				var grid = el('div');
+				grid.id = 'grid';
+				var excluded = getExcluded();
+				var row = [];
+				sourceImages.forEach(function(img, i) {
+					var t = el('div', 'thumb' + (excluded.indexOf(img.name) === -1 ? '' : ' excluded'));
+					t.setAttribute('data-action', 'toggle');
+					t.setAttribute('data-value', img.name);
+					var im = el('img');
+					// online photos use the service's small preview; full-size files would use
+					// a lot of TV memory with many thumbnails. Fall back to the local file offline.
+					im.loading = 'lazy';
+					im.onerror = function() { im.onerror = null; im.src = img.uri; };
+					im.src = img.thumb || img.uri;
+					t.appendChild(im);
+					t.appendChild(el('div', 'check', '✓'));
+					t.appendChild(el('div', 'name', img.label || img.name));
+					grid.appendChild(t);
+					row.push(t);
+					if (row.length === GRID_COLS || i === sourceImages.length - 1) {
+						rows.push(row);
+						row = [];
+					}
+				});
+				if (!sourceImages.length) {
+					grid.appendChild(el('div', 'hint', refreshing ? 'Downloading…' : 'No images downloaded yet.'));
+				}
+				body.appendChild(grid);
+				if (sourceImages.length) {
+					var selectButtons = buttonRow(body, [['Select all', 'all'], ['Select none', 'none']]);
+					selectButtons.forEach(function(b) { b.setAttribute('data-value', src); });
+					rows.push(selectButtons);
+				}
+			}
+		}
+
+		// Images page tab bar (above the scrolling content, so it doesn't scroll away)
+		function tabRow(panel) {
+			var bar = el('div', 'tabs');
+			var els = IMAGE_TABS.map(function(tab) {
+				var t = el('div', 'tab' + (tab.id === imagesTab ? ' active' : ''), tab.label);
+				if (tab.id !== 'general' && sourceOn(tab.id)) t.appendChild(el('span', 'dot', '●'));
+				t.setAttribute('data-action', 'tab');
+				t.setAttribute('data-value', tab.id);
+				bar.appendChild(t);
+				return t;
+			});
+			panel.appendChild(bar);
+			return els;
+		}
+
+		function switchTab(id) {
+			if (id === imagesTab) return;
+			var from = -1, to = -1;
+			IMAGE_TABS.forEach(function(t, i) { if (t.id === imagesTab) from = i; if (t.id === id) to = i; });
+			imagesTab = id;
+			pageAnimation = 'tab-' + (to > from ? 'forward' : 'back');
+			focusRow = 0;
+			focusCol = to;
+			renderSettings();
+		}
+
 		function renderSettings() {
 			var panel = document.getElementById('panel');
+			// a re-render of the same page (e.g. after marking an image) keeps its scroll position
+			// and doesn't animate; changing page slides the new content in
+			var animation = pageAnimation;
+			pageAnimation = '';
+			var oldBody = document.getElementById('panelBody');
+			var oldScroll = oldBody && !animation ? oldBody.scrollTop : 0;
 			panel.innerHTML = '';
 			focusRows = [];
 
-			panel.appendChild(el('h1', '', 'Backdrop settings'));
+			var title = 'Backdrop settings';
+			PAGES.forEach(function(p) { if (p.id === settingsPage) title = '‹  ' + p.label; });
+			var heading = el('h1', '', title);
+			panel.appendChild(heading);
 			var status = el('div', 'status');
 			status.id = 'status';
 			panel.appendChild(status);
 
-			panel.appendChild(el('div', 'section-label', 'Time per image'));
-			focusRows.push(optionRow(panel, DURATIONS, setting('timer', '10'), 'timer'));
+			var tabs = null;
+			if (settingsPage === 'images') {
+				var tabEls = tabRow(panel);
+				tabs = tabEls[0].parentNode;
+				focusRows.push(tabEls); // the tab bar is the first row
+			}
 
-			panel.appendChild(el('div', 'section-label', 'Transition'));
-			focusRows.push(optionRow(panel, TRANSITIONS, setting('transition', 'fade'), 'transition'));
+			var body = el('div', 'panel-body');
+			body.id = 'panelBody';
+			panel.appendChild(body);
+			renderPage(body);
+			if (animation.indexOf('tab-') === 0) {
+				body.classList.add('anim-' + animation.slice(4)); // switching tabs: only the content moves
+			} else if (animation) {
+				heading.classList.add('anim-' + animation);
+				if (tabs) tabs.classList.add('anim-' + animation);
+				body.classList.add('anim-' + animation);
+			} else {
+				body.scrollTop = oldScroll;
+			}
 
-			panel.appendChild(el('div', 'section-label', 'Images (OK to select / unselect)'));
-			var grid = el('div');
-			grid.id = 'grid';
-			var excluded = getExcluded();
-			var row = [];
-			images.forEach(function(img, i) {
-				var t = el('div', 'thumb' + (excluded.indexOf(img.name) === -1 ? '' : ' excluded'));
-				t.setAttribute('data-action', 'toggle');
-				t.setAttribute('data-value', img.name);
-				var im = el('img');
-				im.src = img.uri;
-				t.appendChild(im);
-				t.appendChild(el('div', 'check', '✓'));
-				t.appendChild(el('div', 'name', img.name));
-				grid.appendChild(t);
-				row.push(t);
-				if (row.length === GRID_COLS || i === images.length - 1) {
-					focusRows.push(row);
-					row = [];
-				}
-			});
-			if (!images.length) grid.appendChild(el('div', 'hint', 'No images downloaded yet.'));
-			panel.appendChild(grid);
-
-			var actions = el('div', 'options actions');
-			var actionEls = [
-				['Select all', 'all'],
-				['Select none', 'none'],
-				['Refresh now', 'refresh'],
-				['Change URL', 'url'],
-				['Close', 'close']
-			].map(function(a) {
-				var b = el('div', 'btn', a[0]);
-				b.setAttribute('data-action', a[1]);
-				actions.appendChild(b);
-				return b;
-			});
-			panel.appendChild(actions);
-			focusRows.push(actionEls);
-			panel.appendChild(el('div', 'hint', 'Play/Pause or Back to close'));
+			panel.appendChild(el('div', 'hint', settingsPage === 'main'
+				? 'OK to open  ·  Play/Pause or Back to close'
+				: 'Back to return  ·  Play/Pause to close'));
 
 			renderStatus();
 			focusRow = Math.min(focusRow, focusRows.length - 1);
 			focusCol = Math.min(focusCol, focusRows[focusRow].length - 1);
-			updateFocus();
+			updateFocus(true);
 		}
 
-		function updateFocus() {
+		// instant: jump instead of gliding (used when a page is (re)drawn)
+		function updateFocus(instant) {
 			var prev = document.querySelectorAll('#panel .focused');
 			for (var i = 0; i < prev.length; i++) prev[i].classList.remove('focused');
 			var target = focusRows[focusRow] && focusRows[focusRow][focusCol];
 			if (target) {
 				target.classList.add('focused');
-				if (target.scrollIntoView) target.scrollIntoView({ block: 'nearest' });
+				keepVisible(target, instant);
 			}
+		}
+
+		// Scroll the settings body so the focused item - and the label above its row - are on screen.
+		function keepVisible(target, instant) {
+			var body = document.getElementById('panelBody');
+			if (!body) return;
+			var LABEL_SPACE = 64;  // room for the section label above the row
+			var BOTTOM_SPACE = 24;
+			var top = body.scrollTop;
+			if (focusRow === 0) {
+				top = 0;
+			} else {
+				var t = target.getBoundingClientRect();
+				var b = body.getBoundingClientRect();
+				if (t.top - LABEL_SPACE < b.top) top -= b.top - (t.top - LABEL_SPACE);
+				else if (t.bottom + BOTTOM_SPACE > b.bottom) top += t.bottom + BOTTOM_SPACE - b.bottom;
+				if (focusRow === focusRows.length - 1) {
+					// last row: scroll to the end so notes below it can be read too,
+					// as long as the focused item itself stays in view
+					var itemTop = t.top - b.top + body.scrollTop - LABEL_SPACE;
+					top = Math.max(top, Math.min(body.scrollHeight - body.clientHeight, itemTop));
+				}
+			}
+			if (top === body.scrollTop) return;
+			if (instant || !body.scrollTo) body.scrollTop = top;
+			else body.scrollTo({ top: top, behavior: 'smooth' });
 		}
 
 		function moveFocus(dRow, dCol) {
 			if (dRow) {
 				focusRow = Math.max(0, Math.min(focusRows.length - 1, focusRow + dRow));
 				focusCol = Math.min(focusCol, focusRows[focusRow].length - 1);
+				// entering the tab bar: land on the tab that's open, not the first one
+				focusRows[focusRow].forEach(function(item, i) {
+					if (item.getAttribute('data-action') === 'tab' && item.classList.contains('active')) focusCol = i;
+				});
 			} else {
 				focusCol = Math.max(0, Math.min(focusRows[focusRow].length - 1, focusCol + dCol));
 			}
@@ -696,14 +2316,77 @@
 			target.classList.add('selected');
 		}
 
+		function focusedElement() {
+			return focusRows[focusRow] && focusRows[focusRow][focusCol];
+		}
+
 		function activate() {
-			var target = focusRows[focusRow] && focusRows[focusRow][focusCol];
+			var target = focusedElement();
 			if (!target) return;
 			var action = target.getAttribute('data-action');
 			var value = target.getAttribute('data-value');
 
-			if (action === 'timer' || action === 'transition') {
+			if (action === 'open') {
+				openPage(value);
+			} else if (action === 'close') {
+				closeSettings();
+			} else if (action === 'timer' || action === 'transition') {
 				selectOption(target, action);
+			} else if (action === 'order') {
+				selectOption(target, action);
+				rebuildPlaylist(playlist[slideIndex] && playlist[slideIndex].name);
+			} else if (action === 'keep' || action === 'fetchEvery') {
+				selectOption(target, action);
+				if (action === 'keep') reloadImages(); // the per-theme share changed: show more / fewer now
+				refreshAll('auto'); // downloads any shortfall; extra images are trimmed on the next update
+			} else if (action === 'favmark') {
+				var mi = favMarked.indexOf(value);
+				if (mi === -1) favMarked.push(value); else favMarked.splice(mi, 1);
+				favConfirm = false;
+				renderSettings();
+			} else if (action === 'favclear') {
+				favMarked = [];
+				favConfirm = false;
+				renderSettings();
+			} else if (action === 'favdelete') {
+				if (!favMarked.length) return toast('Mark favorites with OK first');
+				if (!favConfirm) {
+					favConfirm = true; // ask once more before deleting for good
+					return renderSettings();
+				}
+				deleteFavorites(favMarked);
+				favMarked = [];
+				favConfirm = false;
+				reloadImages(function() { renderSettings(); });
+			} else if (action === 'chip') {
+				var key = target.getAttribute('data-key');
+				var list = getList(key);
+				var at = list.indexOf(value);
+				if (at === -1) list.push(value);
+				else if (key === 'whCategories' && list.length === 1) return; // keep at least one category
+				else list.splice(at, 1);
+				localStorage.setItem(key, JSON.stringify(list));
+				target.classList.toggle('selected', at === -1);
+				if (key !== 'unsplashThemes' || UNSPLASH_KEY) themesChanged();
+			} else if (action === 'clearhidden') {
+				if (!hiddenCount()) return toast('No hidden images to clear');
+				if (!hiddenConfirm) {
+					hiddenConfirm = true; // ask once more before deleting
+					return renderSettings();
+				}
+				hiddenConfirm = false;
+				var cleared = clearHidden();
+				toast('Cleared ' + cleared + ' hidden ' + (cleared === 1 ? 'image' : 'images'));
+				reloadImages(function() { renderSettings(); });
+			} else if (action === 'reloadsrc') {
+				toast('Reloading ' + labelFor(IMAGE_TABS, value) + '…');
+				refreshAll('reload', null, [value]);
+				renderStatus();
+			} else if (action === 'clockSize' || action === 'clockPos') {
+				selectOption(target, action);
+				updateClock();
+			} else if (action === 'switch') {
+				setSwitch(target, !target.classList.contains('on'));
 			} else if (action === 'toggle') {
 				var excluded = getExcluded();
 				var i = excluded.indexOf(value);
@@ -711,25 +2394,42 @@
 				setExcluded(excluded);
 				target.classList.toggle('excluded', i === -1);
 				renderStatus();
-			} else if (action === 'all') {
-				setExcluded([]);
+			} else if (action === 'all' || action === 'none') {
+				// only this tab's source; other sources keep their selection
+				var names = images.filter(function(img) { return img.source === value; })
+					.map(function(img) { return img.name; });
+				var others = getExcluded().filter(function(n) { return names.indexOf(n) === -1; });
+				setExcluded(action === 'all' ? others : others.concat(names));
 				renderSettings();
-			} else if (action === 'none') {
-				setExcluded(images.map(function(img) { return img.name; }));
-				renderSettings();
+			} else if (action === 'tab') {
+				switchTab(value);
 			} else if (action === 'refresh') {
-				refresh();
+				refreshAll('update');
 				renderStatus();
 			} else if (action === 'url') {
 				var input = prompt('Enter URL of a ZIP file with images', setting('playout_url', ''));
 				if (input) {
 					localStorage.setItem('playout_url', input.replace(/&amp;/g, '&'));
-					refresh();
-					renderStatus();
+					localStorage.setItem('lastUpdated', '0'); // new link: download it now
+					refreshAll('auto');
+					renderSettings();
 				}
-			} else if (action === 'close') {
-				closeSettings();
 			}
+		}
+
+		// Left/Right: adjust sliders and switches, open sections from the menu, otherwise move
+		function sideways(dir) {
+			var target = focusedElement();
+			var action = target && target.getAttribute('data-action');
+			if (action === 'brightness') adjustBrightness(target, dir * BRIGHTNESS_STEP);
+			else if (action === 'switch') setSwitch(target, dir > 0);
+			else if (action === 'open' && dir > 0) activate();
+			else if (action === 'tab') {
+				// moving along the tab bar switches tabs straight away
+				moveFocus(0, dir);
+				switchTab(focusedElement().getAttribute('data-value'));
+			}
+			else moveFocus(0, dir);
 		}
 
 		// ---------- keys ----------
@@ -754,19 +2454,23 @@
 			var code = event.keyCode;
 
 			if (settingsOpen) {
-				if (isSettingsKey(code) || code === KEY.RETURN) closeSettings();
+				if (isSettingsKey(code)) closeSettings();
+				else if (code === KEY.RETURN) {
+					if (settingsPage === 'main') closeSettings(); else backToMenu();
+				}
 				else if (code === KEY.UP) moveFocus(-1, 0);
 				else if (code === KEY.DOWN) moveFocus(1, 0);
-				else if (code === KEY.LEFT) moveFocus(0, -1);
-				else if (code === KEY.RIGHT) moveFocus(0, 1);
+				else if (code === KEY.LEFT) sideways(-1);
+				else if (code === KEY.RIGHT) sideways(1);
 				else if (code === KEY.ENTER) activate();
 				event.preventDefault();
 				return;
 			}
 
 			if (isSettingsKey(code)) openSettings();
-			else if (code === KEY.LEFT) prevSlide();
-			else if (code === KEY.RIGHT) nextSlide();
+			else if (code === KEY.ENTER) toggleFavorite();
+			else if (code === KEY.LEFT && playlist.length > 1) prevSlide();
+			else if (code === KEY.RIGHT && playlist.length > 1) nextSlide();
 			else if (code === KEY.RETURN) {
 				// hide instead of exit so the slideshow stays loaded in the background
 				tizen.application.getCurrentApplication().hide();
@@ -783,33 +2487,39 @@
 
 			registerKeys();
 			setDef();
+			applyBrightness();
+			updateClock();
+			setInterval(updateClock, 1000);
 
 			// image folders left in Downloads by the earlier prototype of this app
 			['wallA', 'wallB'].forEach(function(name) {
 				removeDir(name, function() {});
 			});
 
-			// show the local copy right away, then check for new images
-			loadLocalCopy(function(err, list) {
-				if (list.length) {
-					usingOfflineCopy = true;
-					setImages(list);
-				}
-				refresh(function(err) {
-					if (err && !images.length) {
-						showMessage('Could not download images. Retrying in 1 minute…');
-						setTimeout(function() { refresh(); }, 60 * 1000);
-					}
-				});
+			// show the local copy right away, then fetch whatever is due
+			reloadImages(function() {
+				(function update() {
+					refreshAll('auto', function() {
+						// nothing to show yet (e.g. no network on first start): try again soon
+						if (!images.length) setTimeout(update, 60 * 1000);
+					});
+				})();
 			});
 
-			setInterval(function() { refresh(); }, REFRESH_MS);
+			setInterval(function() { refreshAll('auto'); }, CHECK_EVERY_MS);
 		}
 	</script>
 </head>
 <body onload="onLoad();">
 	<img id="layer0" class="layer" alt=""/>
 	<img id="layer1" class="layer" alt=""/>
+	<div id="clock">
+		<div class="time-row"><span class="time"></span><span class="ampm"></span></div>
+		<div class="date"></div>
+	</div>
+	<div id="credit"></div>
+	<div id="toast"></div>
+	<div id="dim"></div>
 	<div id="message"></div>
 	<div id="overlay"><div class="panel" id="panel"></div></div>
 </body>
